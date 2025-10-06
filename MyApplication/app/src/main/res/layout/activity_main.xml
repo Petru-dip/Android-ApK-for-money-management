@@ -1,52 +1,67 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
-    <Button
-        android:id="@+id/btn_add_expense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Înregistrează cheltuială" />
-    <Button
-        android:id="@+id/btn_add_income"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Înregistrează venit"
-        android:layout_marginTop="8dp" />
-    <Button
-        android:id="@+id/btn_list_expenses"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Listă cheltuieli"
-        android:layout_marginTop="8dp" />
-    <Button
-        android:id="@+id/btn_list_incomes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Listă venituri"
-        android:layout_marginTop="8dp" />
-    <Button
-        android:id="@+id/btn_reports"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Rapoarte"
-        android:layout_marginTop="8dp"/>
-    <Button
-        android:id="@+id/btn_export_excel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Exportă în Excel (.xlsx)"
-        android:layout_marginTop="8dp" />
+    tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btn_import_excel"
+    <!-- CONȚINUTUL PRINCIPAL -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Importă din Excel (.xlsx)"
-        android:layout_marginTop="8dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+        <!-- TOOLBAR SUS -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:title="BrimTech - Financiar"
+            app:titleTextColor="@android:color/white"
+            app:menu="@menu/top_menu" />
 
-</LinearLayout>
+        <!-- CONȚINUT CENTRAL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp">
 
+            <Button
+                android:id="@+id/btn_add_expense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:backgroundTint="@color/Red"
+                android:text="Înregistrează cheltuială"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/btn_add_income"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/Green"
+                android:text="Înregistrează venit"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- MENIUL LATERAL (DRAWER) -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_menu"
+        app:headerLayout="@layout/nav_header" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

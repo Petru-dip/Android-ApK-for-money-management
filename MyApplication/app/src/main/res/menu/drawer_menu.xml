@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_expenses"
+            android:title="Listă cheltuieli"
+            android:icon="@drawable/ic_list" />
+
+        <item
+            android:id="@+id/nav_incomes"
+            android:title="Listă venituri"
+            android:icon="@drawable/ic_list" />
+
+        <item
+            android:id="@+id/nav_export"
+            android:title="Export Excel"
+            android:icon="@drawable/ic_download" />
+
+        <item
+            android:id="@+id/nav_import"
+            android:title="Import Excel"
+            android:icon="@drawable/ic_upload" />
+    </group>
+</menu>
