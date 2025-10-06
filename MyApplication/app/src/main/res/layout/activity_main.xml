@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+    <Button
+        android:id="@+id/btn_add_expense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Înregistrează cheltuială" />
+    <Button
+        android:id="@+id/btn_add_income"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Înregistrează venit"
+        android:layout_marginTop="8dp" />
+    <Button
+        android:id="@+id/btn_list_expenses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Listă cheltuieli"
+        android:layout_marginTop="8dp" />
+    <Button
+        android:id="@+id/btn_list_incomes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Listă venituri"
+        android:layout_marginTop="8dp" />
+    <Button
+        android:id="@+id/btn_reports"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rapoarte"
+        android:layout_marginTop="8dp"/>
+    <Button
+        android:id="@+id/btn_export_excel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exportă în Excel (.xlsx)"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/btn_import_excel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Importă din Excel (.xlsx)"
+        android:layout_marginTop="8dp" />
+
+
+</LinearLayout>
+
+

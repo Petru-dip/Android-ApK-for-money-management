@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">FinanceApp</string>
+    <string-array name="type_personal_firma">
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+    <string-array name="type_all_personal_firma">
+        <item>Toate</item>
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+    <string-array name="periods_common">
+        <item>Azi</item>
+        <item>Săptămâna curentă</item>
+        <item>Luna curentă</item>
+        <item>Ultimele 30 zile</item>
+    </string-array>
+</resources>

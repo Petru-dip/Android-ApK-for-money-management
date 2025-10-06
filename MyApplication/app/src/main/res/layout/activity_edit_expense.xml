@@ -1,0 +1,50 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+        <EditText
+            android:id="@+id/expense_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Sumă"
+            android:inputType="numberDecimal" />
+        <EditText
+            android:id="@+id/expense_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descriere" />
+        <EditText
+            android:id="@+id/expense_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Data (dd.MM.yyyy)"
+            android:focusable="false"
+            android:clickable="true" />
+        <EditText
+            android:id="@+id/expense_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Categorie" />
+        <Spinner
+            android:id="@+id/expense_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/type_personal_firma" />
+        <Button
+            android:id="@+id/btn_save_expense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvează modificările"
+            android:layout_marginTop="16dp" />
+        <Button
+            android:id="@+id/btn_delete_expense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Șterge"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+</ScrollView>

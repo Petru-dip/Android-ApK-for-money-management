@@ -1,0 +1,21 @@
+<resources>
+<style name="Theme.FinanceApp" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Culori principale pentru Material3 -->
+    <item name="colorPrimary">@color/brand_primary</item>
+    <item name="colorOnPrimary">@color/brand_on_primary</item>
+    <item name="colorSurface">@color/brand_surface</item>
+    <item name="colorOnSurface">@color/brand_on_surface</item>
+
+    <!-- (opțional) shape, controlul colțurilor, stil default pt. MaterialButton -->
+    <item name="materialButtonStyle">@style/Widget.FinanceApp.Button</item>
+</style>
+
+<!-- Stil comun pentru toate butoanele, dacă vrei -->
+<style name="Widget.FinanceApp.Button" parent="@style/Widget.Material3.Button">
+    <item name="android:insetLeft">0dp</item>
+    <item name="android:insetRight">0dp</item>
+    <item name="android:insetTop">0dp</item>
+    <item name="android:insetBottom">0dp</item>
+    <item name="cornerRadius">14dp</item>
+</style>
+</resources>

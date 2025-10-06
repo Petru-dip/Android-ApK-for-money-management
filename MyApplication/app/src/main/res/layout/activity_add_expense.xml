@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+    <EditText
+        android:id="@+id/expense_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Sumă"
+        android:inputType="numberDecimal" />
+    <EditText
+        android:id="@+id/expense_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descriere"
+        android:inputType="textCapSentences" />
+    <EditText
+        android:id="@+id/expense_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Data (dd.MM.yyyy)"
+        android:focusable="false"
+        android:clickable="true"
+        android:paddingTop="8dp" />
+    <EditText
+        android:id="@+id/expense_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Categorie (ex. Alimente)" />
+    <Spinner
+        android:id="@+id/expense_type_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/type_personal_firma"
+        android:paddingTop="8dp" />
+    <Button
+        android:id="@+id/btn_save_expense"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Salvează cheltuială"
+        android:layout_marginTop="16dp" />
+</LinearLayout>
