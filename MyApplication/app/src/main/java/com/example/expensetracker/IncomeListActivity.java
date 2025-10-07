@@ -34,6 +34,7 @@ public class IncomeListActivity extends AppCompatActivity {
                             .setTitle("Ștergi venitul?")
                             .setMessage(e.description)
                             .setPositiveButton("Șterge", (d, w) -> {
+                                MainActivity.shouldRefreshTotals = true;  // refresh la aplicatie pentru citire pret total
                                 new Thread(() -> {
                                     AppDatabase.getInstance(getApplicationContext()).incomeDao().deleteById(e.id);
                                     runOnUiThread(() -> loadData());

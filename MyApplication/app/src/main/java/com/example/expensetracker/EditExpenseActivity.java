@@ -51,6 +51,7 @@ public class EditExpenseActivity extends AppCompatActivity {
         current.date = DatePickerUtil.parse(dateInput.getText().toString().trim());
         current.category = categoryInput.getText().toString().trim();
         current.categoryType = typeSpinner.getSelectedItem().toString();
+        MainActivity.shouldRefreshTotals = true;
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).expenseDao().update(current);
             runOnUiThread(() -> { Toast.makeText(this, "Actualizat", Toast.LENGTH_SHORT).show(); finish(); });
@@ -58,6 +59,7 @@ public class EditExpenseActivity extends AppCompatActivity {
     }
     private void onDelete() {
         if (current == null) return;
+        MainActivity.shouldRefreshTotals = true;
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).expenseDao().deleteById(current.id);
             runOnUiThread(() -> { Toast.makeText(this, "Șters", Toast.LENGTH_SHORT).show(); finish(); });

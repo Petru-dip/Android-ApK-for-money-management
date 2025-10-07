@@ -1,23 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Secțiune principală -->
     <group android:checkableBehavior="single">
+
         <item
             android:id="@+id/nav_expenses"
-            android:title="Listă cheltuieli"
-            android:icon="@drawable/ic_list" />
+            android:icon="@drawable/ic_expense"
+            android:title="Listă cheltuieli" />
 
         <item
             android:id="@+id/nav_incomes"
-            android:title="Listă venituri"
-            android:icon="@drawable/ic_list" />
+            android:icon="@drawable/ic_income"
+            android:title="Listă venituri" />
 
         <item
-            android:id="@+id/nav_export"
-            android:title="Export Excel"
-            android:icon="@drawable/ic_download" />
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_reports"
+            android:title="Rapoarte" />
 
-        <item
-            android:id="@+id/nav_import"
-            android:title="Import Excel"
-            android:icon="@drawable/ic_upload" />
     </group>
+
+    <!-- Secțiune management -->
+    <item android:title="Instrumente">
+        <menu>
+            <item
+                android:id="@+id/nav_export"
+                android:icon="@drawable/ic_export"
+                android:title="Export Excel" />
+            <item
+                android:id="@+id/nav_import"
+                android:icon="@drawable/ic_import"
+                android:title="Import Excel" />
+        </menu>
+    </item>
+
+    <!-- Secțiune altele -->
+    <item android:title="Altele">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Setări" />
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_info"
+                android:title="Despre aplicație" />
+            <item
+                android:id="@+id/nav_theme"
+                android:title="Schimbă tema"
+                android:icon="@drawable/ic_dark_mode" />
+        </menu>
+    </item>
 </menu>

@@ -30,4 +30,8 @@ public interface IncomeDao {
     Double getTotalByTypeAndDate(String sourceType, long from, long to);
     @Query("SELECT SUM(amount) FROM Income WHERE date BETWEEN :from AND :to")
     Double getTotalByDate(long from, long to);
+
+    // ✅ Adaugă aceasta linie:
+    @Query("SELECT IFNULL(SUM(amount), 0) FROM Income")
+    double getTotalAmount();
 }

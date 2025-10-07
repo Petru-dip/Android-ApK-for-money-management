@@ -61,6 +61,7 @@ public class ExpenseListActivity extends AppCompatActivity {
                             .setTitle("Ștergi cheltuiala?")
                             .setMessage(e.description)
                             .setPositiveButton("Șterge", (d, w) -> {
+                                MainActivity.shouldRefreshTotals = true;  // refresh la aplicatie pentru citire pret total
                                 new Thread(() -> {
                                     AppDatabase.getInstance(getApplicationContext()).expenseDao().deleteById(e.id);
                                     runOnUiThread(() -> loadData());

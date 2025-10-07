@@ -41,6 +41,8 @@ public class IncomeActivity extends AppCompatActivity {
         income.sourceType = sourceType;
         income.uid = java.util.UUID.randomUUID().toString();
 
+        MainActivity.shouldRefreshTotals = true;  // refresh la aplicatie pentru citire pret total
+
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).incomeDao().insert(income);
             runOnUiThread(() -> { Toast.makeText(this, "Venit salvat", Toast.LENGTH_SHORT).show(); finish(); });

@@ -42,6 +42,7 @@ public class AddExpenseActivity extends AppCompatActivity {
         ex.date = dateMillis;
         ex.category = category;
         ex.categoryType = type;
+        MainActivity.shouldRefreshTotals = true;
         ex.uid = java.util.UUID.randomUUID().toString();
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).expenseDao().insert(ex);

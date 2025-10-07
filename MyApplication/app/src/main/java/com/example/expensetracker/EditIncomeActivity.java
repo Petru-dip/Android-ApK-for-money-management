@@ -48,6 +48,7 @@ public class EditIncomeActivity extends AppCompatActivity {
         current.description = descriptionInput.getText().toString().trim();
         current.date = DatePickerUtil.parse(dateInput.getText().toString().trim());
         current.sourceType = sourceSpinner.getSelectedItem().toString();
+        MainActivity.shouldRefreshTotals = true;
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).incomeDao().update(current);
             runOnUiThread(() -> { Toast.makeText(this, "Actualizat", Toast.LENGTH_SHORT).show(); finish(); });
@@ -55,6 +56,7 @@ public class EditIncomeActivity extends AppCompatActivity {
     }
     private void onDelete() {
         if (current == null) return;
+        MainActivity.shouldRefreshTotals = true;
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext()).incomeDao().deleteById(current.id);
             runOnUiThread(() -> { Toast.makeText(this, "Șters", Toast.LENGTH_SHORT).show(); finish(); });
