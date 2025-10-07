@@ -49,4 +49,8 @@ public interface ExpenseDao {
 
     @Query("SELECT IFNULL(SUM(amount), 0) FROM Expense")
     double getTotalAmount();
+
+    @Query("SELECT SUM(amount) FROM Expense WHERE categoryType = :categoryType")
+    Double getTotalByCategoryType(String categoryType);
+
 }

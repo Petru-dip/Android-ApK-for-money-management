@@ -34,4 +34,8 @@ public interface IncomeDao {
     // ✅ Adaugă aceasta linie:
     @Query("SELECT IFNULL(SUM(amount), 0) FROM Income")
     double getTotalAmount();
+
+    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :sourceType")
+    Double getTotalBySourceType(String sourceType);
+
 }

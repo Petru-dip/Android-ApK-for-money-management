@@ -4,34 +4,45 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
 import android.view.MenuItem;
 import android.view.animation.AlphaAnimation;
-import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.navigation.NavigationView;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.navigation.NavigationView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private static final String CHANNEL_EXPORT = "export_status";
+    private static final int REQ_NOTIFICATION_PERMISSION = 100;
 
-    // 🔄 Flag global pentru actualizarea totalurilor
     public static boolean shouldRefreshTotals = false;
 
     private TextView tvIncome, tvExpense, tvBalance;
+
+    private enum FilterType {ALL, FIRMA, PERSONAL}
+    private FilterType currentFilter = FilterType.ALL;
+
+    private MaterialButton btnAll, btnFirma, btnPersonal;
 
     private final ActivityResultLauncher<String> exportExcelLauncher =
             registerForActivityResult(
@@ -65,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                                 runOnUiThread(() -> {
                                     new AlertDialog.Builder(this)
                                             .setTitle("Import Excel")
-                                            .setMessage("Import reușit.\n" + res.toString())
+                                            .setMessage("Import reușit.\n" + res)
                                             .setPositiveButton("OK", null)
                                             .show();
 
@@ -105,8 +116,8 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(this::onDrawerItemClick);
 
         // Butoane principale
-        Button btnExpense = findViewById(R.id.btn_add_expense);
-        Button btnIncome = findViewById(R.id.btn_add_income);
+        MaterialButton btnExpense = findViewById(R.id.btn_add_expense);
+        MaterialButton btnIncome = findViewById(R.id.btn_add_income);
         btnExpense.setOnClickListener(v -> {
             v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
             startActivity(new Intent(this, AddExpenseActivity.class));
@@ -116,19 +127,39 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, IncomeActivity.class));
         });
 
-        // Inițializează TextView-urile pentru totaluri
+        // TextView-uri totaluri
         tvIncome = findViewById(R.id.tv_total_income);
         tvExpense = findViewById(R.id.tv_total_expense);
         tvBalance = findViewById(R.id.tv_balance);
 
-        // Actualizează totalurile la pornirea aplicației
-        updateTotals();
+        // Butoane filtrare
+        btnAll = findViewById(R.id.btn_total_all);
+        btnFirma = findViewById(R.id.btn_total_firma);
+        btnPersonal = findViewById(R.id.btn_total_personal);
 
-        // Auto-backup zilnic
+        btnAll.setOnClickListener(v -> {
+            currentFilter = FilterType.ALL;
+            highlightButton(btnAll);
+            updateTotals();
+        });
+
+        btnFirma.setOnClickListener(v -> {
+            currentFilter = FilterType.FIRMA;
+            highlightButton(btnFirma);
+            updateTotals();
+        });
+
+        btnPersonal.setOnClickListener(v -> {
+            currentFilter = FilterType.PERSONAL;
+            highlightButton(btnPersonal);
+            updateTotals();
+        });
+
+        highlightButton(btnAll);
+        updateTotals();
         AutoBackup.scheduleDaily(this);
     }
 
-    // ------------------------ MENIUL DE SUS ------------------------
     private boolean onTopMenuClick(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_reports) {
@@ -140,15 +171,9 @@ public class MainActivity extends AppCompatActivity {
                     .setTitle("Alege tema")
                     .setItems(opts, (d, which) -> {
                         switch (which) {
-                            case 0:
-                                ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_NO);
-                                break;
-                            case 1:
-                                ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_YES);
-                                break;
-                            case 2:
-                                ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                                break;
+                            case 0 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_NO);
+                            case 1 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_YES);
+                            case 2 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                         }
                     }).show();
             return true;
@@ -162,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    // ------------------------ MENIUL LATERAL ------------------------
     private boolean onDrawerItemClick(@NonNull MenuItem item) {
         drawerLayout.closeDrawers();
         int id = item.getItemId();
@@ -178,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.nav_export) {
             exportExcelLauncher.launch("finance-export-" +
-                    new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm",
-                            java.util.Locale.ROOT).format(new java.util.Date()) + ".xlsx");
+                    new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm", java.util.Locale.ROOT)
+                            .format(new java.util.Date()) + ".xlsx");
             return true;
         } else if (id == R.id.nav_import) {
             importExcelLauncher.launch(new String[]{
@@ -203,24 +227,43 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    // ------------------------ TOTALURI ------------------------
     private void updateTotals() {
         new Thread(() -> {
             AppDatabase db = AppDatabase.getInstance(this);
-            double totalIncome = db.incomeDao().getTotalAmount();
-            double totalExpense = db.expenseDao().getTotalAmount();
-            double balance = totalIncome - totalExpense;
+            double totalIncome = 0.0;
+            double totalExpense = 0.0;
+
+            switch (currentFilter) {
+                case ALL -> {
+                    totalIncome = db.incomeDao().getTotalAmount();
+                    totalExpense = db.expenseDao().getTotalAmount();
+                }
+                case FIRMA -> {
+                    Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
+                    Double exp = db.expenseDao().getTotalByCategoryType("FIRMA");
+                    totalIncome = (inc != null ? inc : 0.0);
+                    totalExpense = (exp != null ? exp : 0.0);
+                }
+                case PERSONAL -> {
+                    Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
+                    Double exp = db.expenseDao().getTotalByCategoryType("PERSONAL");
+                    totalIncome = (inc != null ? inc : 0.0);
+                    totalExpense = (exp != null ? exp : 0.0);
+                }
+            }
+
+            final double fIncome = totalIncome;
+            final double fExpense = totalExpense;
+            final double balance = fIncome - fExpense;
 
             runOnUiThread(() -> {
                 animateText(tvIncome, String.format(Locale.getDefault(),
-                        "Venituri totale: %.2f lei", totalIncome));
+                        "Venituri totale: %.2f lei", fIncome));
                 animateText(tvExpense, String.format(Locale.getDefault(),
-                        "Cheltuieli totale: %.2f lei", totalExpense));
+                        "Cheltuieli totale: %.2f lei", fExpense));
 
-                if (balance < 0)
-                    tvBalance.setTextColor(getResources().getColor(R.color.Red));
-                else
-                    tvBalance.setTextColor(getResources().getColor(R.color.Green));
+                tvBalance.setTextColor(getResources().getColor(
+                        balance < 0 ? R.color.Red : R.color.Green));
 
                 animateText(tvBalance, String.format(Locale.getDefault(),
                         "Balanță: %.2f lei", balance));
@@ -228,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // 🔥 Animație fade-in pentru actualizare smooth
     private void animateText(TextView view, String newText) {
         if (view == null) return;
         AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
@@ -247,7 +289,20 @@ public class MainActivity extends AppCompatActivity {
         view.startAnimation(fadeOut);
     }
 
-    // ------------------------ NOTIFICĂRI ------------------------
+    private void highlightButton(MaterialButton selected) {
+        MaterialButton[] all = {btnAll, btnFirma, btnPersonal};
+        for (MaterialButton b : all) {
+            if (b == null) continue;
+            b.setStrokeWidth(1);
+            b.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+        }
+        if (selected != null) {
+            selected.setStrokeWidth(2);
+            selected.setBackgroundColor(getResources().getColor(R.color.teal_200));
+        }
+    }
+
+    // ---------------- NOTIFICĂRI ----------------
     private void createExportChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel ch = new NotificationChannel(
@@ -258,12 +313,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void notifyExport(String title, String text) {
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm == null) return;
+
+        // ✅ verificare permisiune Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        REQ_NOTIFICATION_PERMISSION);
+                return;
+            }
+        }
+
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this, CHANNEL_EXPORT)
                 .setSmallIcon(android.R.drawable.stat_sys_upload_done)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setAutoCancel(true);
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
         nm.notify((int) System.currentTimeMillis(), nb.build());
 
         runOnUiThread(() ->

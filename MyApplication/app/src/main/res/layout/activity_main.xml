@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
 
     <!-- CONȚINUT PRINCIPAL -->
     <LinearLayout
@@ -27,7 +28,8 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:overScrollMode="never">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,21 +43,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardUseCompatPadding="true"
-                    app:strokeWidth="1dp">
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="3dp"
+                    app:cardUseCompatPadding="true">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:gravity="center_vertical"
                         android:padding="16dp">
 
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:contentDescription="@string/app_name"
-                            android:src="@drawable/ic_expense" />
+                            android:src="@drawable/ic_expense"
+                            android:contentDescription="@string/app_name" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -68,22 +71,25 @@
                                 android:text="Înregistrează cheltuială"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
 
                             <TextView
                                 android:text="Adaugă rapid o cheltuială"
                                 android:textSize="14sp"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_add_expense"
-                            style="?attr/materialButtonOutlinedStyle"
+                            style="?attr/materialButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Adaugă" />
+                            android:text="Adaugă"
+                            android:textAllCaps="false" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -93,21 +99,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardUseCompatPadding="true"
-                    app:strokeWidth="1dp">
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="3dp"
+                    app:cardUseCompatPadding="true">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:gravity="center_vertical"
                         android:padding="16dp">
 
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:contentDescription="@string/app_name"
-                            android:src="@drawable/ic_income" />
+                            android:src="@drawable/ic_income"
+                            android:contentDescription="@string/app_name" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -120,22 +127,25 @@
                                 android:text="Înregistrează venit"
                                 android:textSize="18sp"
                                 android:textStyle="bold"
+                                android:textColor="?attr/colorOnSurface"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
 
                             <TextView
                                 android:text="Adaugă rapid un venit"
                                 android:textSize="14sp"
+                                android:textColor="?attr/colorOnSurfaceVariant"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_add_income"
-                            style="?attr/materialButtonOutlinedStyle"
+                            style="?attr/materialButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Adaugă" />
+                            android:text="Adaugă"
+                            android:textAllCaps="false" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -144,9 +154,9 @@
                     android:id="@+id/card_totals"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="32dp"
-                    app:cardCornerRadius="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginBottom="96dp"
+                    app:cardCornerRadius="22dp"
                     app:cardElevation="6dp"
                     app:cardUseCompatPadding="true">
 
@@ -154,8 +164,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp"
+                        android:gravity="center_horizontal">
 
+                        <!-- Titlu -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Totaluri financiare"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/colorOnSurface"
+                            android:paddingBottom="12dp" />
+
+                        <!-- TextView-uri totaluri -->
                         <TextView
                             android:id="@+id/tv_total_income"
                             android:layout_width="match_parent"
@@ -176,24 +198,61 @@
                             android:textSize="16sp"
                             android:paddingBottom="6dp" />
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:background="@android:color/darker_gray"
-                            android:layout_marginBottom="8dp" />
-
                         <TextView
                             android:id="@+id/tv_balance"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Balanță: 0 lei"
+                            android:textColor="?attr/colorOnSurface"
                             android:textStyle="bold"
-                            android:textSize="18sp"
-                            android:textColor="@color/black"
-                            android:gravity="center_horizontal" />
+                            android:textSize="17sp"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="12dp" />
+
+                        <!-- Butoane de filtrare -->
+                        <LinearLayout
+                            android:id="@+id/layout_total_buttons"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:paddingTop="12dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_total_all"
+                                style="?attr/materialButtonStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="3dp"
+                                android:text="Total"
+                                android:textAllCaps="false"
+                                app:cornerRadius="20dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_total_firma"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginHorizontal="3dp"
+                                android:text="Firmă"
+                                android:textAllCaps="false"
+                                app:cornerRadius="20dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_total_personal"
+                                style="?attr/materialButtonStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="3dp"
+                                android:text="Personal"
+                                android:textAllCaps="false"
+                                app:cornerRadius="20dp" />
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
