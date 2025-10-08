@@ -11,16 +11,81 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class ExportImportUtils {
 
-    // =============================
-    // === EXPORT TO EXCEL (.xlsx)
-    // =============================
+    // =========================================================
+    // ===============   Tipuri pentru import   ================
+    // =========================================================
+
+    /** Rezolvarea aleasă de utilizator pentru import. */
+    public enum Resolution {
+        EXCLUDE_DUPLICATES,  // Omite duplicatele (importă doar înregistrările noi)
+        REPLACE_DUPLICATES,  // Rescrie în DB înregistrările care se repetă
+        CANCEL               // Anulează importul
+    }
+
+    /** Pachetul de date citite din Excel (încă nescrise în DB) + număr duplicate. */
+    public static class PendingExcelImport {
+        public final List<Expense> expenses;
+        public final List<Income> incomes;
+        public final int duplicateExpenses;
+        public final int duplicateIncomes;
+
+        public PendingExcelImport(List<Expense> expenses,
+                                  List<Income> incomes,
+                                  int duplicateExpenses,
+                                  int duplicateIncomes) {
+            this.expenses = expenses;
+            this.incomes = incomes;
+            this.duplicateExpenses = duplicateExpenses;
+            this.duplicateIncomes = duplicateIncomes;
+        }
+
+        public boolean hasDuplicates() {
+            return duplicateExpenses > 0 || duplicateIncomes > 0;
+        }
+    }
+
+    /** Rezultatul final al importului (după commit) + sumar pentru UI. */
+    public static class ExcelImportResult {
+        public int expensesInserted;
+        public int incomesInserted;
+        public int expensesUpdated;
+        public int incomesUpdated;
+        public int expensesSkipped;
+        public int incomesSkipped;
+        public Resolution resolution;
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Cheltuieli – inserate: ").append(expensesInserted)
+                    .append(", actualizate: ").append(expensesUpdated)
+                    .append(", omise: ").append(expensesSkipped).append("\n");
+            sb.append("Venituri   – inserate: ").append(incomesInserted)
+                    .append(", actualizate: ").append(incomesUpdated)
+                    .append(", omise: ").append(incomesSkipped);
+            return sb.toString();
+        }
+    }
+
+    // =========================================================
+    // ================   Export la Excel (.xlsx)   ============
+    // =========================================================
+
     public static void exportToExcel(Context ctx, AppDatabase db, Uri outUri) throws Exception {
         List<Expense> expenses = db.expenseDao().getAll();
         List<Income> incomes = db.incomeDao().getAll();
@@ -75,18 +140,56 @@ public class ExportImportUtils {
         }
     }
 
-    // ==================================
-    // === IMPORT FROM EXCEL (.xlsx)
-    // ==================================
-    public static ExcelImportResult importFromExcel(Context ctx, AppDatabase db, Uri inUri) throws Exception {
-        int expensesImported = 0;
-        int incomesImported = 0;
+    // =========================================================
+    // ==================   Import – logică   ==================
+    // =========================================================
+
+    /** Normalizări + chei de potrivire pentru duplicate. */
+    private static String safe(String s) {
+        return s == null ? "" : s.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static String normAmount(double value) {
+        return new BigDecimal(value).setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    // Dacă vrei „egalitate la zi”, normalizează data aici (comentariu mai jos).
+    private static long normDate(long millis) {
+        return millis;
+        // La nivel de zi:
+        // java.util.Calendar c = java.util.Calendar.getInstance();
+        // c.setTimeInMillis(millis);
+        // c.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        // c.set(java.util.Calendar.MINUTE, 0);
+        // c.set(java.util.Calendar.SECOND, 0);
+        // c.set(java.util.Calendar.MILLISECOND, 0);
+        // return c.getTimeInMillis();
+    }
+
+    private static String expenseKey(Expense e) {
+        return safe(e.categoryType) + "|" + safe(e.category) + "|" +
+                normAmount(e.amount) + "|" + safe(e.description) + "|" + normDate(e.date);
+    }
+
+    private static String incomeKey(Income i) {
+        return safe(i.sourceType) + "|" + normAmount(i.amount) + "|" +
+                safe(i.description) + "|" + normDate(i.date);
+    }
+
+    /**
+     * Citește Excel-ul și pregătește importul (fără să scrie în DB). Returnează
+     * lista elementelor și numărul de duplicate față de conținutul actual din DB.
+     */
+    public static PendingExcelImport prepareImportFromExcel(Context ctx, AppDatabase db, Uri inUri) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+        List<Expense> importedExpenses = new ArrayList<>();
+        List<Income> importedIncomes = new ArrayList<>();
 
         try (InputStream is = ctx.getContentResolver().openInputStream(inUri);
              XSSFWorkbook workbook = new XSSFWorkbook(is)) {
 
-            // === Sheet 1: Cheltuieli ===
+            // --- Sheet Cheltuieli ---
             Sheet expenseSheet = workbook.getSheet("Cheltuieli");
             if (expenseSheet != null) {
                 for (int i = 1; i <= expenseSheet.getLastRowNum(); i++) {
@@ -98,21 +201,15 @@ public class ExportImportUtils {
                     e.categoryType = getStringCell(r.getCell(1));
                     e.amount = getNumericCell(r.getCell(2));
                     e.description = getStringCell(r.getCell(3));
-
                     String dateStr = getStringCell(r.getCell(4));
-                    if (!dateStr.isEmpty()) {
-                        e.date = sdf.parse(dateStr).getTime();
-                    } else {
-                        e.date = System.currentTimeMillis();
-                    }
+                    e.date = dateStr.isEmpty() ? System.currentTimeMillis() : sdf.parse(dateStr).getTime();
+                    e.uid = UUID.randomUUID().toString();
 
-                    e.uid = java.util.UUID.randomUUID().toString();
-                    db.expenseDao().insert(e);
-                    expensesImported++;
+                    importedExpenses.add(e);
                 }
             }
 
-            // === Sheet 2: Venituri ===
+            // --- Sheet Venituri ---
             Sheet incomeSheet = workbook.getSheet("Venituri");
             if (incomeSheet != null) {
                 for (int i = 1; i <= incomeSheet.getLastRowNum(); i++) {
@@ -123,25 +220,123 @@ public class ExportImportUtils {
                     inc.sourceType = getStringCell(r.getCell(0));
                     inc.amount = getNumericCell(r.getCell(1));
                     inc.description = getStringCell(r.getCell(2));
-
                     String dateStr = getStringCell(r.getCell(3));
-                    if (!dateStr.isEmpty()) {
-                        inc.date = sdf.parse(dateStr).getTime();
-                    } else {
-                        inc.date = System.currentTimeMillis();
-                    }
+                    inc.date = dateStr.isEmpty() ? System.currentTimeMillis() : sdf.parse(dateStr).getTime();
+                    inc.uid = UUID.randomUUID().toString();
 
-                    inc.uid = java.util.UUID.randomUUID().toString();
-                    db.incomeDao().insert(inc);
-                    incomesImported++;
+                    importedIncomes.add(inc);
                 }
             }
         }
 
-        return new ExcelImportResult(expensesImported, incomesImported);
+        // Construiește seturile/indecșii de chei existente în DB
+        Set<String> existingExpenseKeys = new HashSet<>();
+        for (Expense e : db.expenseDao().getAll()) {
+            existingExpenseKeys.add(expenseKey(e));
+        }
+
+        Set<String> existingIncomeKeys = new HashSet<>();
+        for (Income i : db.incomeDao().getAll()) {
+            existingIncomeKeys.add(incomeKey(i));
+        }
+
+        int dupExpenses = 0;
+        for (Expense e : importedExpenses) {
+            if (existingExpenseKeys.contains(expenseKey(e))) dupExpenses++;
+        }
+
+        int dupIncomes = 0;
+        for (Income i : importedIncomes) {
+            if (existingIncomeKeys.contains(incomeKey(i))) dupIncomes++;
+        }
+
+        return new PendingExcelImport(importedExpenses, importedIncomes, dupExpenses, dupIncomes);
     }
 
-    // === Helper pentru citire sigură de celule ===
+    /**
+     * Aplică scrierea în DB în funcție de rezoluția aleasă de utilizator.
+     * - EXCLUDE_DUPLICATES: inserează doar înregistrările care NU există deja
+     * - REPLACE_DUPLICATES: actualizează înregistrările existente și inserează ce e nou
+     * - CANCEL: nu scrie nimic
+     */
+    public static ExcelImportResult commitImport(AppDatabase db, PendingExcelImport pending, Resolution resolution) {
+        ExcelImportResult out = new ExcelImportResult();
+        out.resolution = resolution;
+
+        if (resolution == Resolution.CANCEL) {
+            return out; // nimic de făcut
+        }
+
+        // Indexează existentele din DB după cheie
+        Map<String, Expense> expByKey = new HashMap<>();
+        for (Expense e : db.expenseDao().getAll()) {
+            expByKey.put(expenseKey(e), e);
+        }
+        Map<String, Income> incByKey = new HashMap<>();
+        for (Income i : db.incomeDao().getAll()) {
+            incByKey.put(incomeKey(i), i);
+        }
+
+        // --- Cheltuieli ---
+        for (Expense imp : pending.expenses) {
+            String k = expenseKey(imp);
+            Expense exist = expByKey.get(k);
+            if (exist == null) {
+                // nou
+                db.expenseDao().insert(imp);
+                out.expensesInserted++;
+            } else if (resolution == Resolution.REPLACE_DUPLICATES) {
+                // rescrie duplicatele (păstrează id/uid existente)
+                exist.amount = imp.amount;
+                exist.description = imp.description;
+                exist.category = imp.category;
+                exist.categoryType = imp.categoryType;
+                exist.date = imp.date;
+                db.expenseDao().update(exist);
+                out.expensesUpdated++;
+            } else {
+                // EXCLUDE_DUPLICATES => se omite
+                out.expensesSkipped++;
+            }
+        }
+
+        // --- Venituri ---
+        for (Income imp : pending.incomes) {
+            String k = incomeKey(imp);
+            Income exist = incByKey.get(k);
+            if (exist == null) {
+                db.incomeDao().insert(imp);
+                out.incomesInserted++;
+            } else if (resolution == Resolution.REPLACE_DUPLICATES) {
+                exist.amount = imp.amount;
+                exist.description = imp.description;
+                exist.sourceType = imp.sourceType;
+                exist.date = imp.date;
+                db.incomeDao().update(exist);
+                out.incomesUpdated++;
+            } else {
+                out.incomesSkipped++;
+            }
+        }
+
+        // notifică UI (dacă folosești acest flag în MainActivity)
+        MainActivity.shouldRefreshTotals = true;
+        return out;
+    }
+
+    /**
+     * Wrapper compatibil cu apelul vechi: importă și omite duplicatele.
+     * (Dacă vrei alt comportament implicit, schimbă rezoluția de mai jos.)
+     */
+    public static ExcelImportResult importFromExcel(Context ctx, AppDatabase db, Uri inUri) throws Exception {
+        PendingExcelImport pending = prepareImportFromExcel(ctx, db, inUri);
+        return commitImport(db, pending, Resolution.EXCLUDE_DUPLICATES);
+    }
+
+    // =========================================================
+    // ==================  Helperi celule Excel  ===============
+    // =========================================================
+
     private static String getStringCell(Cell cell) {
         if (cell == null) return "";
         try {
@@ -168,28 +363,14 @@ public class ExportImportUtils {
         }
     }
 
-    // === REZULTAT IMPORT ===
-    public static class ExcelImportResult {
-        public int expensesCount;
-        public int incomesCount;
+    // =========================================================
+    // ================  Export JSON (backup)  =================
+    // =========================================================
 
-        public ExcelImportResult(int e, int i) {
-            this.expensesCount = e;
-            this.incomesCount = i;
-            MainActivity.shouldRefreshTotals = true;  // refresh la aplicatie pentru citire pret total
-        }
-
-        @Override
-        public String toString() {
-            return "Cheltuieli importate: " + expensesCount + "\nVenituri importate: " + incomesCount;
-        }
-    }
-
-    // === EXPORT JSON pentru backup intern ===
     public static void exportJsonToStream(Context ctx, AppDatabase db, OutputStream os) throws Exception {
         org.json.JSONObject root = new org.json.JSONObject();
 
-        java.util.List<Expense> expenses = db.expenseDao().getAll();
+        List<Expense> expenses = db.expenseDao().getAll();
         org.json.JSONArray expArray = new org.json.JSONArray();
         for (Expense e : expenses) {
             org.json.JSONObject o = new org.json.JSONObject();
@@ -203,7 +384,7 @@ public class ExportImportUtils {
         }
         root.put("expenses", expArray);
 
-        java.util.List<Income> incomes = db.incomeDao().getAll();
+        List<Income> incomes = db.incomeDao().getAll();
         org.json.JSONArray incArray = new org.json.JSONArray();
         for (Income i : incomes) {
             org.json.JSONObject o = new org.json.JSONObject();

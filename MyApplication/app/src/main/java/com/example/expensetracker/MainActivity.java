@@ -71,27 +71,91 @@ public class MainActivity extends AppCompatActivity {
                         if (uri == null) return;
                         new Thread(() -> {
                             try {
-                                ExportImportUtils.ExcelImportResult res =
-                                        ExportImportUtils.importFromExcel(this, AppDatabase.getInstance(this), uri);
-                                runOnUiThread(() -> {
-                                    new AlertDialog.Builder(this)
-                                            .setTitle("Import Excel")
-                                            .setMessage("Import reușit.\n" + res)
-                                            .setPositiveButton("OK", null)
-                                            .show();
+                                AppDatabase db = AppDatabase.getInstance(this);
+                                ExportImportUtils.PendingExcelImport pending =
+                                        ExportImportUtils.prepareImportFromExcel(this, db, uri);
 
-                                    shouldRefreshTotals = true;
-                                    updateTotals();
+                                runOnUiThread(() -> {
+                                    if (pending.hasDuplicates()) {
+                                        String msg = "Am găsit " + pending.duplicateExpenses + " cheltuieli și "
+                                                + pending.duplicateIncomes + " venituri care există deja în aplicație.\n\n"
+                                                + "Cum vrei să continui?";
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Import Excel – duplicate detectate")
+                                                .setMessage(msg)
+                                                .setPositiveButton("Rescrie duplicatele", (d, w) -> {
+                                                    // REPLACE_DUPLICATES
+                                                    new Thread(() -> {
+                                                        ExportImportUtils.ExcelImportResult res =
+                                                                ExportImportUtils.commitImport(db, pending,
+                                                                        ExportImportUtils.Resolution.REPLACE_DUPLICATES);
+                                                        runOnUiThread(() -> {
+                                                            new AlertDialog.Builder(this)
+                                                                    .setTitle("Import finalizat")
+                                                                    .setMessage(res.toString())
+                                                                    .setPositiveButton("OK", null)
+                                                                    .show();
+                                                            MainActivity.shouldRefreshTotals = true;
+                                                            updateTotals();
+                                                        });
+                                                    }).start();
+                                                })
+                                                .setNeutralButton("Omite duplicatele", (d, w) -> {
+                                                    // EXCLUDE_DUPLICATES
+                                                    new Thread(() -> {
+                                                        ExportImportUtils.ExcelImportResult res =
+                                                                ExportImportUtils.commitImport(db, pending,
+                                                                        ExportImportUtils.Resolution.EXCLUDE_DUPLICATES);
+                                                        runOnUiThread(() -> {
+                                                            new AlertDialog.Builder(this)
+                                                                    .setTitle("Import finalizat")
+                                                                    .setMessage(res.toString())
+                                                                    .setPositiveButton("OK", null)
+                                                                    .show();
+                                                            MainActivity.shouldRefreshTotals = true;
+                                                            updateTotals();
+                                                        });
+                                                    }).start();
+                                                })
+                                                .setNegativeButton("Anulează", (d, w) -> {
+                                                    // CANCEL
+                                                    // Nu scriem nimic, doar informăm:
+                                                    new AlertDialog.Builder(this)
+                                                            .setTitle("Import anulat")
+                                                            .setMessage("Nu au fost făcute modificări.")
+                                                            .setPositiveButton("OK", null)
+                                                            .show();
+                                                })
+                                                .show();
+                                    } else {
+                                        // Fără duplicate -> import direct (EXCLUDE_DUPLICATES are același efect)
+                                        new Thread(() -> {
+                                            ExportImportUtils.ExcelImportResult res =
+                                                    ExportImportUtils.commitImport(db, pending,
+                                                            ExportImportUtils.Resolution.EXCLUDE_DUPLICATES);
+                                            runOnUiThread(() -> {
+                                                new AlertDialog.Builder(this)
+                                                        .setTitle("Import Excel")
+                                                        .setMessage(res.toString())
+                                                        .setPositiveButton("OK", null)
+                                                        .show();
+                                                MainActivity.shouldRefreshTotals = true;
+                                                updateTotals();
+                                            });
+                                        }).start();
+                                    }
                                 });
                             } catch (Exception e) {
+                                e.printStackTrace();
                                 runOnUiThread(() -> new AlertDialog.Builder(this)
                                         .setTitle("Eroare la import")
-                                        .setMessage(e.getMessage())
+                                        .setMessage(String.valueOf(e.getMessage()))
                                         .setPositiveButton("OK", null)
                                         .show());
                             }
                         }).start();
                     });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
