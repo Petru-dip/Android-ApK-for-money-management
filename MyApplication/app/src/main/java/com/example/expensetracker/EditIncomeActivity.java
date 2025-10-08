@@ -5,13 +5,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-public class EditIncomeActivity extends AppCompatActivity {
+import com.example.expensetracker.BaseActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+
+
+public class EditIncomeActivity extends BaseActivity  {
     private EditText amountInput, descriptionInput, dateInput;
     private Spinner sourceSpinner;
     private Income current;
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupToolbar(R.string.title_expenses, true);   // cu back
         setContentView(R.layout.activity_edit_income);
         amountInput = findViewById(R.id.income_amount);
         descriptionInput = findViewById(R.id.income_description);
@@ -62,4 +67,15 @@ public class EditIncomeActivity extends AppCompatActivity {
             runOnUiThread(() -> { Toast.makeText(this, "Șters", Toast.LENGTH_SHORT).show(); finish(); });
         }).start();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu); // <— important, ca să apară iconița comună
+        getMenuInflater().inflate(R.menu.app_menu, menu); // meniul tău existent
+        return true;
+    }
+
+
 }
+
+

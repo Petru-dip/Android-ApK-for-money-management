@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_theme"  android:title="Tema"         app:showAsAction="never"/>
-    <item android:id="@+id/action_export" android:title="Export JSON"   app:showAsAction="never"/>
-    <item android:id="@+id/action_import" android:title="Import JSON"   app:showAsAction="never"/>
+
+    <!-- Exemplu: opțiune pentru import și export -->
+    <item
+        android:id="@+id/action_import_excel"
+        android:title="Importă Excel"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_export_excel"
+        android:title="Exportă Excel"
+        app:showAsAction="never" />
+
 </menu>

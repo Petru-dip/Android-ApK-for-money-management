@@ -27,20 +27,23 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Meniul comun: doar iconița aplicației cu inel
-        getMenuInflater().inflate(R.menu.menu_common, menu);
+        // încarcă ambele meniuri
+        getMenuInflater().inflate(R.menu.drawer_menu, menu);   // meniul tău original
+        getMenuInflater().inflate(R.menu.menu_common, menu); // iconița aplicației
+
+        // click pe iconița încercuită
         MenuItem appIconItem = menu.findItem(R.id.action_app_icon);
         if (appIconItem != null && appIconItem.getActionView() != null) {
             View v = appIconItem.getActionView();
-            // Click pe iconiță -> "About" (sau ce vrei tu)
             v.setOnClickListener(view -> startActivity(new Intent(this, AboutActivity.class)));
         }
-        return true; // per-activity poate adăuga propriul meniu apelând super + inflate
+        return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Back din toolbar pentru ecranele secundare
+        // butonul back din bară (stânga)
         if (item.getItemId() == android.R.id.home) {
             getOnBackPressedDispatcher().onBackPressed();
             return true;

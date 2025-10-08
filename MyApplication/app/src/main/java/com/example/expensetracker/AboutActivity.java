@@ -1,16 +1,17 @@
 package com.example.expensetracker;
 
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.TextView;
 
-public class AboutActivity extends AppCompatActivity {
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        ThemeUtils.applySavedTheme(this);
+public class AboutActivity extends BaseActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new android.widget.TextView(this) {{
-            setText("BrimTech Finance\nVersiune 1.0");
-            setPadding(32,32,32,32);
-            setTextSize(18f);
-        }});
+        setContentView(R.layout.activity_about);
+        setupToolbar(R.string.app_name, true);
+
+        TextView tv = findViewById(R.id.aboutText);
+        tv.setText("BrimTech Expense Tracker\n\nVersiunea 1.0\n© 2025 BrimTech Solutions");
     }
 }

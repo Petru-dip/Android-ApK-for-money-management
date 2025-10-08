@@ -1,55 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Secțiune principală -->
+    <!-- 🔹 Secțiune principală -->
     <group android:checkableBehavior="single">
-
         <item
             android:id="@+id/nav_expenses"
             android:icon="@drawable/ic_expense"
-            android:title="Listă cheltuieli" />
+            android:title="Cheltuieli" />
 
         <item
             android:id="@+id/nav_incomes"
             android:icon="@drawable/ic_income"
-            android:title="Listă venituri" />
+            android:title="Venituri" />
 
         <item
             android:id="@+id/nav_reports"
-            android:icon="@drawable/ic_reports"
+            android:icon="@drawable/ic_bar_chart"
             android:title="Rapoarte" />
-
     </group>
 
-    <!-- Secțiune management -->
-    <item android:title="Instrumente">
-        <menu>
-            <item
-                android:id="@+id/nav_export"
-                android:icon="@drawable/ic_export"
-                android:title="Export Excel" />
-            <item
-                android:id="@+id/nav_import"
-                android:icon="@drawable/ic_import"
-                android:title="Import Excel" />
-        </menu>
-    </item>
+    <!-- 🔹 Secțiune import/export -->
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_export"
+            android:icon="@drawable/ic_export"
+            android:title="Export Excel" />
 
-    <!-- Secțiune altele -->
-    <item android:title="Altele">
-        <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_settings"
-                android:title="Setări" />
-            <item
-                android:id="@+id/nav_about"
-                android:icon="@drawable/ic_info"
-                android:title="Despre aplicație" />
-            <item
-                android:id="@+id/nav_theme"
-                android:title="Schimbă tema"
-                android:icon="@drawable/ic_dark_mode" />
-        </menu>
-    </item>
+        <item
+            android:id="@+id/nav_import"
+            android:icon="@drawable/ic_import"
+            android:title="Import Excel" />
+    </group>
+
+    <!-- 🔹 Setări și alte opțiuni -->
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_theme"
+            android:icon="@drawable/ic_dark_mode"
+            android:title="Schimbă tema" />
+
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Setări" />
+
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info"
+            android:title="Despre aplicație" />
+    </group>
+
 </menu>

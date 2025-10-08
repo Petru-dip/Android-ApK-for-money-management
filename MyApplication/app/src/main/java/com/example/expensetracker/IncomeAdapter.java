@@ -9,6 +9,16 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
+    public void submit(List<Income> newData) {
+        if (data != null) {
+            data.clear();
+            data.addAll(newData);
+        } else {
+            data = newData;
+        }
+        notifyDataSetChanged();
+    }
+
     public interface OnIncomeClickListener { void onClick(Income e); }
     private List<Income> data;
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());

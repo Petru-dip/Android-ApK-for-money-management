@@ -53,4 +53,8 @@ public interface ExpenseDao {
     @Query("SELECT SUM(amount) FROM Expense WHERE categoryType = :categoryType")
     Double getTotalByCategoryType(String categoryType);
 
+    @Query("SELECT * FROM Expense WHERE (:type IS NULL OR categoryType = :type) ORDER BY date DESC")
+    List<Expense> getAllFiltered(String type);
+
+
 }

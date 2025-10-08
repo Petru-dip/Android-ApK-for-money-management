@@ -16,7 +16,10 @@
         <activity android:name=".ExpenseListActivity" android:exported="false" />
         <activity android:name=".ExpenseReportActivity" android:exported="false" />
         <activity android:name=".AddExpenseActivity" android:exported="false" />
+        <activity android:name=".AboutActivity" />
         <activity android:name=".MainActivity" android:exported="true">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

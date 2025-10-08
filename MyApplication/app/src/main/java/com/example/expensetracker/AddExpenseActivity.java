@@ -6,12 +6,13 @@ import android.widget.Spinner;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-public class AddExpenseActivity extends AppCompatActivity {
+public class AddExpenseActivity extends BaseActivity {
     private EditText amountInput, descriptionInput, dateInput, categoryInput;
     private Spinner typeSpinner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupToolbar(R.string.title_expenses, true);   // cu back
         setContentView(R.layout.activity_add_expense);
         amountInput = findViewById(R.id.expense_amount);
         descriptionInput = findViewById(R.id.expense_description);

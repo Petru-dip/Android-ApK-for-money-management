@@ -1,0 +1,19 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    android:padding="16dp"
+    android:background="@color/purple_700"
+    android:gravity="bottom">
+
+    <TextView
+        android:text="BrimTech"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:text="Gestiune financiară"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+</LinearLayout>

@@ -22,6 +22,9 @@ public class ExpenseReportActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_expense_list); // sau layout-ul ecranului
+        setupToolbar(R.string.title_expenses, true);   // cu back
+
         setContentView(R.layout.activity_expense_report);
         pieChart = findViewById(R.id.pieChart);
         barChart = findViewById(R.id.barChart);

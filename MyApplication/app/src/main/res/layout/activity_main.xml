@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="?attr/colorSurface"
+    tools:context=".MainActivity">
 
-    <!-- CONȚINUT PRINCIPAL -->
+    <!-- ======= CONȚINUT PRINCIPAL ======= -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Toolbar -->
+        <!-- ✅ Toolbar sus -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -24,8 +27,7 @@
             app:navigationIcon="@drawable/ic_menu"
             app:menu="@menu/top_menu" />
 
-
-        <!-- Conținut scrollabil -->
+        <!-- ✅ Conținut scrollabil -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -38,7 +40,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Card: Cheltuială -->
+                <!-- 🔹 Card: Cheltuială -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_add_expense"
                     android:layout_width="match_parent"
@@ -94,7 +96,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card: Venit -->
+                <!-- 🔹 Card: Venit -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_add_income"
                     android:layout_width="match_parent"
@@ -150,7 +152,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card: Totaluri -->
+                <!-- 🔹 Card: Totaluri -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_totals"
                     android:layout_width="match_parent"
@@ -168,7 +170,6 @@
                         android:padding="20dp"
                         android:gravity="center_horizontal">
 
-                        <!-- Titlu -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -178,7 +179,6 @@
                             android:textColor="?attr/colorOnSurface"
                             android:paddingBottom="12dp" />
 
-                        <!-- TextView-uri totaluri -->
                         <TextView
                             android:id="@+id/tv_total_income"
                             android:layout_width="match_parent"
@@ -210,7 +210,6 @@
                             android:paddingTop="6dp"
                             android:paddingBottom="12dp" />
 
-                        <!-- Butoane de filtrare -->
                         <LinearLayout
                             android:id="@+id/layout_total_buttons"
                             android:layout_width="match_parent"
@@ -258,12 +257,13 @@
         </ScrollView>
     </LinearLayout>
 
-    <!-- MENIU LATERAL -->
+    <!-- ======= MENIU LATERAL ======= -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_menu" />
 
