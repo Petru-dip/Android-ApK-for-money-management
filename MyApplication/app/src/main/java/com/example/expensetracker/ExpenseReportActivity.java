@@ -14,7 +14,8 @@ import com.github.mikephil.charting.data.PieEntry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-public class ExpenseReportActivity extends AppCompatActivity {
+public class ExpenseReportActivity extends BaseActivity {
+
     private PieChart pieChart;
     private BarChart barChart;
     private TextView tvTotals;

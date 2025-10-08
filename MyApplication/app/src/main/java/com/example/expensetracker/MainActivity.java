@@ -29,7 +29,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private DrawerLayout drawerLayout;
     private static final String CHANNEL_EXPORT = "export_status";
@@ -162,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
         ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
+        setupToolbar(R.string.app_name, false); // fără buton back pe ecranul principal
 
         createExportChannel();
 

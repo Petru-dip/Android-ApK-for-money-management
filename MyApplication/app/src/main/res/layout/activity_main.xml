@@ -24,6 +24,7 @@
             app:navigationIcon="@drawable/ic_menu"
             app:menu="@menu/top_menu" />
 
+
         <!-- Conținut scrollabil -->
         <ScrollView
             android:layout_width="match_parent"

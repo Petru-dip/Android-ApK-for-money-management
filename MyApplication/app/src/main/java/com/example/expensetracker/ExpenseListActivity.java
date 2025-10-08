@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-public class ExpenseListActivity extends AppCompatActivity {
+public class ExpenseListActivity extends BaseActivity {
+
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private Spinner typeSpinner, periodSpinner;
@@ -23,6 +24,8 @@ public class ExpenseListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        setupToolbar(R.string.app_name, false); // fără buton back pe ecranul principal
         setContentView(R.layout.activity_expense_list);
         recyclerView = findViewById(R.id.recycler_expenses);
         progressBar = findViewById(R.id.progress);
