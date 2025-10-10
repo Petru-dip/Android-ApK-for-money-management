@@ -15,32 +15,56 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.FinanceApp">
 
-        <activity android:name=".EditIncomeActivity" android:exported="false" />
-        <activity android:name=".IncomeListActivity" android:exported="false" />
-        <activity android:name=".EditExpenseActivity" android:exported="false" />
-        <activity android:name=".IncomeActivity" android:exported="false" />
-        <activity android:name=".ExpenseListActivity" android:exported="false" />
-        <activity android:name=".ExpenseReportActivity" android:exported="false" />
-        <activity android:name=".AddExpenseActivity" android:exported="false" />
-
-        <activity android:name=".SettingsActivity" android:exported="false" />
-
-        <!-- UNICA declarație pentru MainActivity (launcher + prefill) -->
+        <!-- Launcher -->
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:exported="true">
-            <!-- Launcher -->
+            android:exported="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Deschidere cu prefill din notificare/ADB -->
-            <intent-filter>
-                <action android:name="com.example.expensetracker.ACTION_EXPENSE_FROM_NOTIFICATION" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
         </activity>
+
+        <!-- Liste -->
+        <activity
+            android:name=".ExpenseListActivity"
+            android:exported="false"
+            android:label="@string/title_expenses" />
+        <activity
+            android:name=".IncomeListActivity"
+            android:exported="false"
+            android:label="@string/title_incomes" />
+
+        <!-- Form-uri de adăugare / editare -->
+        <activity
+            android:name=".AddExpenseActivity"
+            android:exported="false"
+            android:label="@string/title_expenses" />
+        <activity
+            android:name=".IncomeActivity"
+            android:exported="false"
+            android:label="@string/title_incomes" />
+        <activity
+            android:name=".EditExpenseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditIncomeActivity"
+            android:exported="false" />
+
+        <!-- Rapoarte / setări / despre -->
+        <activity
+            android:name=".ExpenseReportActivity"
+            android:exported="false"
+            android:label="@string/view_by_category" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="@string/about" />
 
         <!-- Notification Listener -->
         <service
@@ -53,8 +77,7 @@
             </intent-filter>
         </service>
 
-        <!-- (Opțional) QS Tile: dacă o folosești, ține minte android:exported -->
-        <!--
+        <!-- (Opțional) QS Tile
         <service
             android:name=".AutoSaveTileService"
             android:label="Auto-save"
