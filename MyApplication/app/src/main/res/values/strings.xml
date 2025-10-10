@@ -35,6 +35,13 @@
         <item>Luna curentă</item>
         <item>Ultimele 30 zile</item>
     </string-array>
+    <string name="edit">Editează</string>
+    <string name="delete">Șterge</string>
+    <string name="cancel">Anulează</string>
+
+    <string name="confirm_delete_income">Sigur vrei să ștergi venitul?</string>
+    <string name="confirm_delete_expense">Sigur vrei să ștergi cheltuiala?</string>
+
 
     <!-- Auto-Save -->
     <string name="menu_auto_save_on">Auto-save: PORNIT</string>
