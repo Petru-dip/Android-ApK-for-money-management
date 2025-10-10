@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">FinanceApp</string>
+<<<<<<< Updated upstream
 
     <string name="filter_all">Toate</string>
     <string name="filter_personal">Personal</string>
@@ -9,5 +10,30 @@
     <string name="view_by_category">Pe categorii</string>
     <string name="title_expenses">Cheltuieli</string>
     <string name="title_incomes">Venituri</string>
+=======
+    <string-array name="type_personal_firma">
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+    <string-array name="type_all_personal_firma">
+        <item>Toate</item>
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+    <string-array name="periods_common">
+        <item>Azi</item>
+        <item>Săptămâna curentă</item>
+        <item>Luna curentă</item>
+        <item>Ultimele 30 zile</item>
+
+    </string-array>
+
+    <string name="menu_auto_save_on">Auto-save: PORNIT</string>
+    <string name="menu_auto_save_off">Auto-save: OPRIT</string>
+
+
+        <string name="toast_auto_save_on">Auto-Save activat. Cheltuielile se salvează automat din notificări.</string>
+        <string name="toast_auto_save_off">Auto-Save dezactivat. Se va deschide aplicația pentru confirmare.</string>
+>>>>>>> Stashed changes
 
 </resources>

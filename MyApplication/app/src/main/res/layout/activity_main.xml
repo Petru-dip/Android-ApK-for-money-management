@@ -6,10 +6,21 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+<<<<<<< Updated upstream
     android:background="?attr/colorSurface"
     tools:context=".MainActivity">
 
     <!-- ======= CONȚINUT PRINCIPAL ======= -->
+=======
+    app:menu="@menu/main_menu"
+    android:background="?attr/colorSurface">
+
+
+
+
+
+    <!-- CONȚINUT PRINCIPAL -->
+>>>>>>> Stashed changes
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -27,7 +38,12 @@
             app:navigationIcon="@drawable/ic_menu"
             app:menu="@menu/top_menu" />
 
+<<<<<<< Updated upstream
         <!-- ✅ Conținut scrollabil -->
+=======
+
+        <!-- Conținut scrollabil -->
+>>>>>>> Stashed changes
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -231,7 +247,7 @@
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_total_firma"
-                                style="?attr/materialButtonOutlinedStyle"
+                                style="?attr/materialButtonStyle"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -247,7 +263,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginStart="3dp"
-                                android:text="Personal"
+                                android:text="Privat"
                                 android:textAllCaps="false"
                                 app:cornerRadius="20dp" />
                         </LinearLayout>

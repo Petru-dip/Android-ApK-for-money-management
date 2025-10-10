@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -23,10 +24,16 @@
         android:showAsAction="never" />
 
     <!-- Setări -->
+=======
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+>>>>>>> Stashed changes
     <item
         android:id="@+id/action_settings"
         android:title="Setări"
         android:icon="@drawable/ic_settings"
+<<<<<<< Updated upstream
         android:showAsAction="never" />
 
     <!-- Despre aplicație -->
@@ -35,5 +42,8 @@
         android:title="Despre aplicație"
         android:icon="@drawable/ic_info"
         android:showAsAction="never" />
+=======
+        app:showAsAction="always" />
+>>>>>>> Stashed changes
 
 </menu>

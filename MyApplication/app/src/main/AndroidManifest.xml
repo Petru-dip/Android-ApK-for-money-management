@@ -1,6 +1,12 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.expensetracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NFC (opțional) -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+
+    <!-- Notificări (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
@@ -16,14 +22,55 @@
         <activity android:name=".ExpenseListActivity" android:exported="false" />
         <activity android:name=".ExpenseReportActivity" android:exported="false" />
         <activity android:name=".AddExpenseActivity" android:exported="false" />
+<<<<<<< Updated upstream
         <activity android:name=".AboutActivity" />
         <activity android:name=".MainActivity" android:exported="true">
 
 
+=======
+        <activity android:name=".SettingsActivity" android:exported="false" />
+
+        <!-- UNICA declarație pentru MainActivity (launcher + prefill) -->
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:exported="true">
+            <!-- Launcher -->
+>>>>>>> Stashed changes
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Deschidere cu prefill din notificare/ADB -->
+            <intent-filter>
+                <action android:name="com.example.expensetracker.ACTION_EXPENSE_FROM_NOTIFICATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
+
+        <!-- Notification Listener -->
+        <service
+            android:name=".PaymentNotificationService"
+            android:exported="true"
+            android:label="Expense Tracker"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- (Opțional) QS Tile: dacă o folosești, ține minte android:exported -->
+        <!--
+        <service
+            android:name=".AutoSaveTileService"
+            android:label="Auto-save"
+            android:icon="@drawable/ic_auto_on"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        -->
     </application>
 </manifest>

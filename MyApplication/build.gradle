@@ -1,6 +1,1 @@
-plugins {
-    id 'com.android.application' version '8.6.0' apply false
-}
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+// root build.gradle - lăsat intenționat gol pentru AGP 8.x

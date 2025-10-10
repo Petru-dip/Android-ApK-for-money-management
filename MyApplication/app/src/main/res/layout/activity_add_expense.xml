@@ -56,4 +56,11 @@
         android:layout_height="wrap_content"
         android:text="Salvează cheltuială"
         android:layout_marginTop="16dp" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_auto_save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Auto-salvează"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginTop="100dp"/>
 </LinearLayout>
