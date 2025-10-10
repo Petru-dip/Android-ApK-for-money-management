@@ -22,12 +22,7 @@
         <activity android:name=".ExpenseListActivity" android:exported="false" />
         <activity android:name=".ExpenseReportActivity" android:exported="false" />
         <activity android:name=".AddExpenseActivity" android:exported="false" />
-<<<<<<< Updated upstream
-        <activity android:name=".AboutActivity" />
-        <activity android:name=".MainActivity" android:exported="true">
 
-
-=======
         <activity android:name=".SettingsActivity" android:exported="false" />
 
         <!-- UNICA declarație pentru MainActivity (launcher + prefill) -->
@@ -36,7 +31,6 @@
             android:launchMode="singleTop"
             android:exported="true">
             <!-- Launcher -->
->>>>>>> Stashed changes
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

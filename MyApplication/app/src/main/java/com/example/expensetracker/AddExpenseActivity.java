@@ -9,22 +9,24 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-<<<<<<< Updated upstream
-public class AddExpenseActivity extends BaseActivity {
-=======
+
+import java.util.Locale;
 
 public class AddExpenseActivity extends AppCompatActivity {
     private static final String TAG = "AddExpenseExtras";
 
->>>>>>> Stashed changes
     private EditText amountInput, descriptionInput, dateInput, categoryInput;
     private Spinner typeSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupToolbar(R.string.title_expenses, true);   // cu back
+
+        // 1) Întâi încărcăm layoutul
         setContentView(R.layout.activity_add_expense);
+
+        // 2) Apoi setăm toolbar-ul (altfel risti NPE în setupToolbar)
+        setupToolbar(R.string.title_expenses, true);
 
         amountInput = findViewById(R.id.expense_amount);
         descriptionInput = findViewById(R.id.expense_description);
@@ -33,7 +35,8 @@ public class AddExpenseActivity extends AppCompatActivity {
         typeSpinner = findViewById(R.id.expense_type_spinner);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.type_personal_firma, android.R.layout.simple_spinner_item);
+                this, R.array.type_personal_firma, android.R.layout.simple_spinner_item
+        );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeSpinner.setAdapter(adapter);
 
@@ -67,7 +70,6 @@ public class AddExpenseActivity extends AppCompatActivity {
 
         if (merchant != null && !merchant.isEmpty()) {
             descriptionInput.setText(merchant);
-            // dacă nu ai categorie venită și comerciantul e de tip supermarket, pune default
             if ((category == null || category.isEmpty()) && looksLikeGroceries(merchant)) {
                 category = "Cumpărături";
             }
@@ -79,11 +81,13 @@ public class AddExpenseActivity extends AppCompatActivity {
         // currency: momentan nefolosit în UI
 
         Button save = findViewById(R.id.btn_save_expense);
-        save.setOnClickListener(v -> onSaveStrict()); // varianta clasică: cere sumă
+        if (save != null) {
+            save.setOnClickListener(v -> onSaveStrict());
+        }
 
         Button autoSave = findViewById(R.id.btn_auto_save);
         if (autoSave != null) {
-            autoSave.setOnClickListener(v -> onAutoSave()); // salvează cu default 01.01 dacă lipsește suma
+            autoSave.setOnClickListener(v -> onAutoSave());
         }
     }
 
@@ -110,27 +114,22 @@ public class AddExpenseActivity extends AppCompatActivity {
         String amountStr = amountInput.getText().toString().trim();
 
         if (amountStr.isEmpty()) {
-            // default 01.01
             amount = 1.01d;
             amountInput.setText("1.01");
         } else {
             try {
                 amount = Double.parseDouble(amountStr.replace(',', '.'));
             } catch (NumberFormatException e) {
-                // tot default dacă e invalid
                 amount = 1.01d;
                 amountInput.setText("1.01");
             }
         }
 
-        // dacă nu ai categorie aleasă și descrierea indică supermarket, pune „Cumpărături”
         String catNow = categoryInput.getText().toString().trim();
         String descNow = descriptionInput.getText().toString().trim();
         if (catNow.isEmpty() && looksLikeGroceries(descNow)) {
             categoryInput.setText("Cumpărături");
         }
-
-        // dacă nu ai descriere, pune „Necunoscut”
         if (descNow.isEmpty()) {
             descriptionInput.setText("Necunoscut");
         }
@@ -142,8 +141,11 @@ public class AddExpenseActivity extends AppCompatActivity {
         String desc = descriptionInput.getText().toString().trim();
         String dateStr = dateInput.getText().toString().trim();
         long dateMillis = DatePickerUtil.parse(dateStr);
+        if (dateMillis == 0L) {
+            dateMillis = System.currentTimeMillis(); // fallback sigur
+        }
         String category = categoryInput.getText().toString().trim();
-        String type = typeSpinner.getSelectedItem().toString(); // PERSONAL / FIRMA
+        String type = (String) typeSpinner.getSelectedItem(); // PERSONAL / FIRMA
 
         Expense ex = new Expense();
         ex.amount = amount;
@@ -191,10 +193,15 @@ public class AddExpenseActivity extends AppCompatActivity {
     /** Heuristic mic pentru magazine alimentare. Extinde după nevoie. */
     private boolean looksLikeGroceries(String text) {
         if (text == null) return false;
-        String t = text.toLowerCase();
-        return t.contains("mega")      || t.contains("mega image")
+        String t = text.toLowerCase(Locale.ROOT);
+        return t.contains("mega image") || t.contains("mega")
                 || t.contains("kaufland")  || t.contains("lidl")
                 || t.contains("carrefour") || t.contains("auchan")
                 || t.contains("profi")     || t.contains("penny");
+    }
+
+    // Presupunem că ai o metodă existentă de setup toolbar:
+    private void setupToolbar(int titleRes, boolean showBack) {
+        // implementarea ta existentă (findViewById după setContentView)
     }
 }

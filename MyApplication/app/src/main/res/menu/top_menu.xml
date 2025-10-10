@@ -1,49 +1,12 @@
-<<<<<<< Updated upstream
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Iconița aplicației din dreapta sus -->
-    <item
-        android:id="@+id/action_app_icon"
-        android:title="@string/app_name"
-        android:icon="@drawable/ic_settings"
-        android:showAsAction="always" />
-
-    <!-- Rapoarte -->
-    <item
-        android:id="@+id/action_reports"
-        android:title="Rapoarte"
-        android:icon="@drawable/ic_bar_chart"
-        android:showAsAction="never" />
-
-    <!-- Tema -->
-    <item
-        android:id="@+id/action_theme"
-        android:title="Schimbă tema"
-        android:icon="@drawable/ic_dark_mode"
-        android:showAsAction="never" />
-
-    <!-- Setări -->
-=======
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
->>>>>>> Stashed changes
     <item
         android:id="@+id/action_settings"
         android:title="Setări"
         android:icon="@drawable/ic_settings"
-<<<<<<< Updated upstream
-        android:showAsAction="never" />
 
-    <!-- Despre aplicație -->
-    <item
-        android:id="@+id/action_about"
-        android:title="Despre aplicație"
-        android:icon="@drawable/ic_info"
-        android:showAsAction="never" />
-=======
         app:showAsAction="always" />
->>>>>>> Stashed changes
 
 </menu>

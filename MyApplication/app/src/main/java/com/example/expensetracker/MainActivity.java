@@ -20,12 +20,13 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import java.util.Locale;
@@ -156,8 +157,10 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
+
+        // Un singur setContentView
         setContentView(R.layout.activity_main);
-        setContentView(R.layout.activity_main);
+
         setupToolbar(R.string.app_name, false); // fără buton back pe ecranul principal
 
         // Forward către AddExpenseActivity dacă am venit din notificare/ADB (fluxul manual)
@@ -165,16 +168,20 @@ public class MainActivity extends BaseActivity {
 
         createExportChannel();
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            if (drawerLayout != null) drawerLayout.open();
-        });
-
-        // Drawer
+        // Drawer + Toolbar
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.navigation_view);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // DrawerToggle: gestionează iconița hamburger și deschiderea/închiderea
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar,
+                R.string.app_name, R.string.app_name
+        );
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this::onDrawerItemClick);
         }
@@ -230,7 +237,7 @@ public class MainActivity extends BaseActivity {
         Intent add = new Intent(this, AddExpenseActivity.class);
         add.setAction(intent.getAction());
         if (intent.getExtras() != null) {
-            add.putExtras(intent.getExtras()); // păstrăm toate cheile: extra_amount, extra_currency, extra_merchant, extra_category, extra_source etc.
+            add.putExtras(intent.getExtras()); // păstrăm toate cheile
         }
         startActivity(add);
     }
