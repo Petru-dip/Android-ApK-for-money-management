@@ -1,41 +1,48 @@
 package com.example.expensetracker;
 
-import androidx.room.*;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+
 import java.util.List;
 
 @Dao
 public interface IncomeDao {
-    @Insert void insert(Income e);
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertIgnore(List<Income> list);
+    @Query("SELECT * FROM Income")
+    List<Income> getAll();
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertReplace(List<Income> list);
+    @Query("SELECT * FROM Income ORDER BY date DESC")
+    List<Income> getAllOrderByDateDesc();
 
-    @Update void update(Income e);
-    @Delete void delete(Income e);
+    @Query("SELECT * FROM Income WHERE id = :id LIMIT 1")
+    Income getById(int id);
 
-    @Query("DELETE FROM Income WHERE id = :id") void deleteById(int id);
-    @Query("SELECT * FROM Income WHERE id = :id LIMIT 1") Income getById(int id);
-    @Query("SELECT * FROM Income WHERE uid = :uid LIMIT 1") Income getByUid(String uid);
-    @Query("SELECT * FROM Income WHERE uid IS NULL OR uid = ''") List<Income> getMissingUid();
+    @Query("SELECT * FROM Income WHERE uid = :uid LIMIT 1")
+    Income getByUid(String uid);
 
-    @Query("SELECT * FROM Income ORDER BY date DESC") List<Income> getAll();
-    @Query("SELECT * FROM Income WHERE date BETWEEN :from AND :to ORDER BY date DESC")
-    List<Income> getByDateRange(long from, long to);
-    @Query("SELECT * FROM Income WHERE sourceType = :sourceType AND date BETWEEN :from AND :to ORDER BY date DESC")
-    List<Income> getByTypeAndDate(String sourceType, long from, long to);
-    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :sourceType AND date BETWEEN :from AND :to")
-    Double getTotalByTypeAndDate(String sourceType, long from, long to);
-    @Query("SELECT SUM(amount) FROM Income WHERE date BETWEEN :from AND :to")
-    Double getTotalByDate(long from, long to);
+    @Insert
+    long insert(Income income);
 
-    // ✅ Adaugă aceasta linie:
-    @Query("SELECT IFNULL(SUM(amount), 0) FROM Income")
-    double getTotalAmount();
+    @Update
+    int update(Income income);
 
-    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :sourceType")
-    Double getTotalBySourceType(String sourceType);
+    @Delete
+    int delete(Income income);
 
+    // cerute de MainActivity/rapoarte:
+    @Query("SELECT SUM(amount) FROM Income")
+    Double getTotalAmount();
+
+    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :type")
+    Double getTotalBySourceType(String type); // ex. "FIRMA" sau "PERSONAL"
+
+    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :type AND date BETWEEN :from AND :to")
+    Double getTotalByTypeAndDate(String type, long from, long to);
+
+    // pentru UidBackfill
+    @Query("SELECT * FROM Income WHERE (uid IS NULL OR uid = '')")
+    List<Income> getMissingUid();
 }

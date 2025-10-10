@@ -20,6 +20,7 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
     public interface OnIncomeClickListener {
         void onEdit(Income income);
         void onDelete(Income income);
+        default void onOpen(Income income) { onEdit(income); }
     }
 
     private final List<Income> items = new ArrayList<>();
@@ -29,13 +30,12 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
         this.listener = l;
     }
 
-    public void submitList(List<Income> data) {
+    public void setItems(List<Income> newItems) {
         items.clear();
-        if (data != null) items.addAll(data);
+        if (newItems != null) items.addAll(newItems);
         notifyDataSetChanged();
     }
 
-    @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
@@ -52,15 +52,9 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
         h.tvAmount.setText(String.format(Locale.getDefault(), "%.2f RON", in.amount));
         h.tvDate.setText(formatDate(in.date));
 
-        h.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onEdit(in);
-        });
-        h.btnEdit.setOnClickListener(v -> {
-            if (listener != null) listener.onEdit(in);
-        });
-        h.btnDelete.setOnClickListener(v -> {
-            if (listener != null) listener.onDelete(in);
-        });
+        h.itemView.setOnClickListener(v -> { if (listener != null) listener.onOpen(in); });
+        h.btnEdit.setOnClickListener(v -> { if (listener != null) listener.onEdit(in); });
+        h.btnDelete.setOnClickListener(v -> { if (listener != null) listener.onDelete(in); });
     }
 
     @Override

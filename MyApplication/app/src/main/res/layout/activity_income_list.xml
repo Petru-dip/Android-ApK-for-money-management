@@ -26,27 +26,12 @@
         android:id="@+id/empty_view_incomes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nu există venituri încă."
+        android:text="@string/no_incomes_yet"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <!-- toolbarul vine din BaseActivity / setupToolbar -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/income_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="8dp"/>
-    </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
