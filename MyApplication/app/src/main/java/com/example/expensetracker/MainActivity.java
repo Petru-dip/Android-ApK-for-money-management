@@ -290,19 +290,21 @@ public class MainActivity extends BaseActivity {
 
             switch (currentFilter) {
                 case ALL -> {
-                    totalIncome = db.incomeDao().getTotalAmount();
-                    totalExpense = db.expenseDao().getTotalAmount();
+                    Double inc = db.incomeDao().getTotalAmount();   // era double totalIncome = ...
+                    Double exp = db.expenseDao().getTotalAmount();
+                    totalIncome  = (inc != null ? inc : 0.0);
+                    totalExpense = (exp != null ? exp : 0.0);
                 }
                 case FIRMA -> {
                     Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
                     Double exp = db.expenseDao().getTotalByCategoryType("FIRMA");
-                    totalIncome = (inc != null ? inc : 0.0);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case PERSONAL -> {
                     Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
                     Double exp = db.expenseDao().getTotalByCategoryType("PERSONAL");
-                    totalIncome = (inc != null ? inc : 0.0);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
             }
