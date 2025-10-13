@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.HapticFeedbackConstants;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
@@ -19,17 +20,18 @@ import com.google.android.material.navigation.NavigationView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private DrawerLayout drawerLayout;
     private static final String CHANNEL_EXPORT = "export_status";
@@ -84,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
                                                 .setTitle("Import Excel – duplicate detectate")
                                                 .setMessage(msg)
                                                 .setPositiveButton("Rescrie duplicatele", (d, w) -> {
-                                                    // REPLACE_DUPLICATES
                                                     new Thread(() -> {
                                                         ExportImportUtils.ExcelImportResult res =
                                                                 ExportImportUtils.commitImport(db, pending,
@@ -101,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                                                     }).start();
                                                 })
                                                 .setNeutralButton("Omite duplicatele", (d, w) -> {
-                                                    // EXCLUDE_DUPLICATES
                                                     new Thread(() -> {
                                                         ExportImportUtils.ExcelImportResult res =
                                                                 ExportImportUtils.commitImport(db, pending,
@@ -118,8 +118,6 @@ public class MainActivity extends AppCompatActivity {
                                                     }).start();
                                                 })
                                                 .setNegativeButton("Anulează", (d, w) -> {
-                                                    // CANCEL
-                                                    // Nu scriem nimic, doar informăm:
                                                     new AlertDialog.Builder(this)
                                                             .setTitle("Import anulat")
                                                             .setMessage("Nu au fost făcute modificări.")
@@ -128,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
                                                 })
                                                 .show();
                                     } else {
-                                        // Fără duplicate -> import direct (EXCLUDE_DUPLICATES are același efect)
                                         new Thread(() -> {
                                             ExportImportUtils.ExcelImportResult res =
                                                     ExportImportUtils.commitImport(db, pending,
@@ -156,40 +153,54 @@ public class MainActivity extends AppCompatActivity {
                         }).start();
                     });
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
+
+        // Un singur setContentView
         setContentView(R.layout.activity_main);
+
+        setupToolbar(R.string.app_name, false); // fără buton back pe ecranul principal
+
+        // Forward către AddExpenseActivity dacă am venit din notificare/ADB (fluxul manual)
+        handleExpensePrefillIntent(getIntent());
 
         createExportChannel();
 
-        // Toolbar
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-            drawerLayout.open();
-        });
-        toolbar.setOnMenuItemClickListener(this::onTopMenuClick);
-
-        // Drawer
+        // Drawer + Toolbar
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(this::onDrawerItemClick);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // DrawerToggle: gestionează iconița hamburger și deschiderea/închiderea
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar,
+                R.string.app_name, R.string.app_name
+        );
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this::onDrawerItemClick);
+        }
 
         // Butoane principale
         MaterialButton btnExpense = findViewById(R.id.btn_add_expense);
         MaterialButton btnIncome = findViewById(R.id.btn_add_income);
-        btnExpense.setOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-            startActivity(new Intent(this, AddExpenseActivity.class));
-        });
-        btnIncome.setOnClickListener(v -> {
-            v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-            startActivity(new Intent(this, IncomeActivity.class));
-        });
+        if (btnExpense != null) {
+            btnExpense.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                startActivity(new Intent(this, AddExpenseActivity.class));
+            });
+        }
+        if (btnIncome != null) {
+            btnIncome.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                startActivity(new Intent(this, IncomeActivity.class));
+            });
+        }
 
         // TextView-uri totaluri
         tvIncome = findViewById(R.id.tv_total_income);
@@ -201,58 +212,38 @@ public class MainActivity extends AppCompatActivity {
         btnFirma = findViewById(R.id.btn_total_firma);
         btnPersonal = findViewById(R.id.btn_total_personal);
 
-        btnAll.setOnClickListener(v -> {
-            currentFilter = FilterType.ALL;
-            highlightButton(btnAll);
-            updateTotals();
-        });
-
-        btnFirma.setOnClickListener(v -> {
-            currentFilter = FilterType.FIRMA;
-            highlightButton(btnFirma);
-            updateTotals();
-        });
-
-        btnPersonal.setOnClickListener(v -> {
-            currentFilter = FilterType.PERSONAL;
-            highlightButton(btnPersonal);
-            updateTotals();
-        });
+        if (btnAll != null) btnAll.setOnClickListener(v -> { currentFilter = FilterType.ALL;     highlightButton(btnAll);     updateTotals(); });
+        if (btnFirma != null) btnFirma.setOnClickListener(v -> { currentFilter = FilterType.FIRMA;   highlightButton(btnFirma);   updateTotals(); });
+        if (btnPersonal != null) btnPersonal.setOnClickListener(v -> { currentFilter = FilterType.PERSONAL; highlightButton(btnPersonal); updateTotals(); });
 
         highlightButton(btnAll);
         updateTotals();
         AutoBackup.scheduleDaily(this);
     }
 
-    private boolean onTopMenuClick(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_reports) {
-            startActivity(new Intent(this, ExpenseReportActivity.class));
-            return true;
-        } else if (id == R.id.action_theme) {
-            String[] opts = {"Luminoasă", "Întunecată", "Urmărește sistemul"};
-            new AlertDialog.Builder(this)
-                    .setTitle("Alege tema")
-                    .setItems(opts, (d, which) -> {
-                        switch (which) {
-                            case 0 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_NO);
-                            case 1 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_YES);
-                            case 2 -> ThemeUtils.setTheme(this, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                        }
-                    }).show();
-            return true;
-        } else if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        } else if (id == R.id.action_about) {
-            startActivity(new Intent(this, AboutActivity.class));
-            return true;
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleExpensePrefillIntent(intent);
+    }
+
+    /** Dacă aplicația a fost deschisă cu ACTION_EXPENSE_FROM_NOTIFICATION, deschidem AddExpense cu extras-urile primite. */
+    private void handleExpensePrefillIntent(Intent intent) {
+        if (intent == null) return;
+        if (!PaymentNotificationService.ACTION_EXPENSE_FROM_NOTIFICATION.equals(intent.getAction()))
+            return;
+
+        Intent add = new Intent(this, AddExpenseActivity.class);
+        add.setAction(intent.getAction());
+        if (intent.getExtras() != null) {
+            add.putExtras(intent.getExtras()); // păstrăm toate cheile
         }
-        return false;
+        startActivity(add);
     }
 
     private boolean onDrawerItemClick(@NonNull MenuItem item) {
-        drawerLayout.closeDrawers();
+        if (drawerLayout != null) drawerLayout.closeDrawers();
         int id = item.getItemId();
 
         if (id == R.id.nav_expenses) {
@@ -299,19 +290,21 @@ public class MainActivity extends AppCompatActivity {
 
             switch (currentFilter) {
                 case ALL -> {
-                    totalIncome = db.incomeDao().getTotalAmount();
-                    totalExpense = db.expenseDao().getTotalAmount();
+                    Double inc = db.incomeDao().getTotalAmount();   // era double totalIncome = ...
+                    Double exp = db.expenseDao().getTotalAmount();
+                    totalIncome  = (inc != null ? inc : 0.0);
+                    totalExpense = (exp != null ? exp : 0.0);
                 }
                 case FIRMA -> {
                     Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
                     Double exp = db.expenseDao().getTotalByCategoryType("FIRMA");
-                    totalIncome = (inc != null ? inc : 0.0);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case PERSONAL -> {
                     Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
                     Double exp = db.expenseDao().getTotalByCategoryType("PERSONAL");
-                    totalIncome = (inc != null ? inc : 0.0);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
             }
@@ -380,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (nm == null) return;
 
-        // ✅ verificare permisiune Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this,
                     android.Manifest.permission.POST_NOTIFICATIONS)
@@ -415,5 +407,34 @@ public class MainActivity extends AppCompatActivity {
             updateTotals();
             shouldRefreshTotals = false;
         }
+    }
+
+    // ------- MENIU: Auto-Save Toggle -------
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        boolean on = Settings.isAutoSaveOn(this);
+        MenuItem item = menu.findItem(R.id.action_auto_save);
+        if (item != null) {
+            item.setTitle(on ? R.string.menu_auto_save_on : R.string.menu_auto_save_off);
+            item.setIcon(on ? R.drawable.ic_income : R.drawable.ic_expense);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_auto_save) {
+            boolean on = Settings.toggleAutoSave(this);
+            item.setTitle(on ? R.string.menu_auto_save_on : R.string.menu_auto_save_off);
+            item.setIcon(on ? R.drawable.ic_income : R.drawable.ic_expense);
+            android.widget.Toast.makeText(
+                    this,
+                    on ? getString(R.string.toast_auto_save_on) : getString(R.string.toast_auto_save_off),
+                    android.widget.Toast.LENGTH_SHORT
+            ).show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

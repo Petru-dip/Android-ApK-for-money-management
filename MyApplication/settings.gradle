@@ -1,21 +1,18 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }   // pentru MPAndroidChart
-    }
-    plugins {
-        id 'com.android.application' version '8.6.0'
+        gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }   // pentru MPAndroidChart
+        maven { url = uri("https://jitpack.io") }
     }
 }
-rootProject.name = "FinanceApp"
-include ':app'
+rootProject.name = "MyApplication"
+include(":app")

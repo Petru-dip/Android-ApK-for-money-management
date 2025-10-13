@@ -1,23 +1,93 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.expensetracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NFC (opțional) -->
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+
+    <!-- Notificări (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.FinanceApp">
-        <activity android:name=".EditIncomeActivity" android:exported="false" />
-        <activity android:name=".IncomeListActivity" android:exported="false" />
-        <activity android:name=".EditExpenseActivity" android:exported="false" />
-        <activity android:name=".IncomeActivity" android:exported="false" />
-        <activity android:name=".ExpenseListActivity" android:exported="false" />
-        <activity android:name=".ExpenseReportActivity" android:exported="false" />
-        <activity android:name=".AddExpenseActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="true">
+
+        <!-- Launcher -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Liste -->
+        <activity
+            android:name=".ExpenseListActivity"
+            android:exported="false"
+            android:label="@string/title_expenses" />
+        <activity
+            android:name=".IncomeListActivity"
+            android:exported="false"
+            android:label="@string/title_incomes" />
+
+        <!-- Form-uri de adăugare / editare -->
+        <activity
+            android:name=".AddExpenseActivity"
+            android:exported="false"
+            android:label="@string/title_expenses" />
+        <activity
+            android:name=".IncomeActivity"
+            android:exported="false"
+            android:label="@string/title_incomes" />
+        <activity
+            android:name=".EditExpenseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditIncomeActivity"
+            android:exported="false" />
+
+        <!-- Rapoarte / setări / despre -->
+        <activity
+            android:name=".ExpenseReportActivity"
+            android:exported="false"
+            android:label="@string/view_by_category" />
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings" />
+        <activity
+            android:name=".AboutActivity"
+            android:exported="false"
+            android:label="@string/about" />
+
+        <!-- Notification Listener -->
+        <service
+            android:name=".PaymentNotificationService"
+            android:exported="true"
+            android:label="Expense Tracker"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- (Opțional) QS Tile
+        <service
+            android:name=".AutoSaveTileService"
+            android:label="Auto-save"
+            android:icon="@drawable/ic_auto_on"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+        -->
     </application>
 </manifest>

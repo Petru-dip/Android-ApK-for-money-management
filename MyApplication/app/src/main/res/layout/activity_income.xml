@@ -1,38 +1,46 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
-    <EditText
-        android:id="@+id/income_amount"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Sumă"
-        android:inputType="numberDecimal" />
-    <EditText
-        android:id="@+id/income_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Descriere"
-        android:inputType="textCapSentences" />
-    <EditText
-        android:id="@+id/income_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Data (dd.MM.yyyy)"
-        android:focusable="false"
-        android:clickable="true"
-        android:paddingTop="8dp" />
-    <Spinner
-        android:id="@+id/income_source_type"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:entries="@array/type_personal_firma"
-        android:paddingTop="8dp" />
-    <Button
-        android:id="@+id/btn_save_income"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Salvează venit"
-        android:layout_marginTop="16dp" />
-</LinearLayout>
+        android:layout_height="wrap_content">
+
+        <!-- Toolbar comun -->
+        <include layout="@layout/include_toolbar"/>
+
+        <EditText
+            android:id="@+id/income_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Sumă"
+            android:inputType="numberDecimal"/>
+
+        <EditText
+            android:id="@+id/income_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descriere"/>
+
+        <EditText
+            android:id="@+id/income_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:hint="Data (yyyy-MM-dd)"/>
+
+        <Spinner
+            android:id="@+id/income_source_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btn_save_income"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvează"/>
+    </LinearLayout>
+</ScrollView>

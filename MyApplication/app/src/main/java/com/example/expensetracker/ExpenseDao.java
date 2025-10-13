@@ -1,56 +1,46 @@
 package com.example.expensetracker;
 
-import androidx.room.*;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+
 import java.util.List;
 
 @Dao
 public interface ExpenseDao {
-    @Insert void insert(Expense e);
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insertIgnore(List<Expense> list);
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertReplace(List<Expense> list);
-
-    @Update void update(Expense e);
-    @Delete void delete(Expense e);
-
-    @Query("DELETE FROM Expense WHERE id = :id")
-    void deleteById(int id);
-
-    @Query("SELECT * FROM Expense WHERE id = :id LIMIT 1")
-    Expense getById(int id);
-
-    @Query("SELECT * FROM Expense WHERE uid = :uid LIMIT 1")
-    Expense getByUid(String uid);
-
-    @Query("SELECT * FROM Expense WHERE uid IS NULL OR uid = ''")
-    List<Expense> getMissingUid();
-
-    @Query("SELECT * FROM Expense ORDER BY date DESC")
+    @Query("SELECT * FROM expense ORDER BY date DESC")
     List<Expense> getAll();
 
-    // ✅ Noua metodă care lipsea:
-    @Query("SELECT * FROM Expense WHERE date BETWEEN :from AND :to ORDER BY date DESC")
-    List<Expense> getExpensesBetween(long from, long to);
+    @Query("SELECT * FROM expense WHERE id = :id LIMIT 1")
+    Expense getById(int id);
 
-    @Query("SELECT * FROM Expense WHERE date BETWEEN :from AND :to ORDER BY date DESC")
-    List<Expense> getByDateRange(long from, long to);
+    @Query("SELECT * FROM expense WHERE uid = :uid LIMIT 1")
+    Expense getByUid(String uid);
 
-    @Query("SELECT * FROM Expense WHERE categoryType = :categoryType AND date BETWEEN :from AND :to ORDER BY date DESC")
-    List<Expense> getByTypeAndDate(String categoryType, long from, long to);
+    @Insert
+    void insert(Expense e);
 
-    @Query("SELECT SUM(amount) FROM Expense WHERE categoryType = :categoryType AND date BETWEEN :from AND :to")
-    Double getTotalByTypeAndDate(String categoryType, long from, long to);
+    @Update
+    void update(Expense e);
 
-    @Query("SELECT SUM(amount) FROM Expense WHERE date BETWEEN :from AND :to")
-    Double getTotalByDate(long from, long to);
+    @Delete
+    void delete(Expense e);
 
-    @Query("SELECT IFNULL(SUM(amount), 0) FROM Expense")
-    double getTotalAmount();
+    // folosite în MainActivity
+    @Query("SELECT SUM(amount) FROM expense")
+    Double getTotalAmount();
 
-    @Query("SELECT SUM(amount) FROM Expense WHERE categoryType = :categoryType")
-    Double getTotalByCategoryType(String categoryType);
+    @Query("SELECT SUM(amount) FROM expense WHERE categoryType = :type")
+    Double getTotalByCategoryType(String type);
 
+    // folosite de ExpenseReportActivity (logurile tale arătau apeluri aici)
+    @Query("SELECT SUM(amount) FROM expense WHERE categoryType = :type AND date BETWEEN :from AND :to")
+    Double getTotalByTypeAndDate(String type, long from, long to);
+
+    // folosit de UidBackfill (ai avut eroare anterior)
+    @Query("SELECT * FROM expense WHERE uid IS NULL OR uid = ''")
+    List<Expense> getMissingUid();
 }
