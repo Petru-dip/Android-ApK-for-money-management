@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import java.util.List;
 
@@ -62,6 +63,28 @@ public class IncomeListActivity extends BaseActivity {
                         .show();
             }
         });
+
+        // Swipe to delete with Undo
+        ItemTouchHelper.SimpleCallback swipe = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override public boolean onMove(RecyclerView rv, RecyclerView.ViewHolder vh, RecyclerView.ViewHolder target) { return false; }
+            @Override public void onSwiped(RecyclerView.ViewHolder vh, int dir) {
+                int pos = vh.getBindingAdapterPosition();
+                if (pos < 0) return;
+                Income removed = adapter.removeAt(pos);
+                com.google.android.material.snackbar.Snackbar.make(recycler, R.string.deleted, com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, v -> adapter.restoreAt(pos, removed))
+                        .addCallback(new com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback<>() {
+                            @Override public void onDismissed(com.google.android.material.snackbar.BaseTransientBottomBar<?> transientBottomBar, int event) {
+                                if (event != com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_ACTION && removed != null) {
+                                    new Thread(() -> AppDatabase.getInstance(getApplicationContext()).incomeDao().delete(removed)).start();
+                                    MainActivity.shouldRefreshTotals = true;
+                                }
+                            }
+                        })
+                        .show();
+            }
+        };
+        new ItemTouchHelper(swipe).attachToRecyclerView(recycler);
 
         loadData();
     }

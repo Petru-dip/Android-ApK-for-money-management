@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -189,6 +191,9 @@ public class MainActivity extends BaseActivity {
         // Butoane principale
         MaterialButton btnExpense = findViewById(R.id.btn_add_expense);
         MaterialButton btnIncome = findViewById(R.id.btn_add_income);
+        MaterialCardView cardExpense = findViewById(R.id.card_add_expense);
+        MaterialCardView cardIncome = findViewById(R.id.card_add_income);
+        ExtendedFloatingActionButton fabQuickAdd = findViewById(R.id.fab_quick_add);
         if (btnExpense != null) {
             btnExpense.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
@@ -199,6 +204,26 @@ public class MainActivity extends BaseActivity {
             btnIncome.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
                 startActivity(new Intent(this, IncomeActivity.class));
+            });
+        }
+        if (cardExpense != null) {
+            View.OnClickListener go = v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                startActivity(new Intent(this, AddExpenseActivity.class));
+            };
+            cardExpense.setOnClickListener(go);
+        }
+        if (cardIncome != null) {
+            View.OnClickListener go = v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                startActivity(new Intent(this, IncomeActivity.class));
+            };
+            cardIncome.setOnClickListener(go);
+        }
+        if (fabQuickAdd != null) {
+            fabQuickAdd.setOnClickListener(v -> {
+                v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                startActivity(new Intent(this, AddExpenseActivity.class));
             });
         }
 

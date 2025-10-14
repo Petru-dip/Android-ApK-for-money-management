@@ -7,6 +7,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
@@ -31,9 +32,41 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
     }
 
     public void setItems(List<Income> newItems) {
+        List<Income> old = new ArrayList<>(items);
         items.clear();
         if (newItems != null) items.addAll(newItems);
-        notifyDataSetChanged();
+        DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return old.size(); }
+            @Override public int getNewListSize() { return items.size(); }
+            @Override public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                Income o = old.get(oldItemPosition);
+                Income n = items.get(newItemPosition);
+                return o.id == n.id && String.valueOf(o.uid).equals(String.valueOf(n.uid));
+            }
+            @Override public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Income o = old.get(oldItemPosition);
+                Income n = items.get(newItemPosition);
+                return o.amount == n.amount && safeEq(o.description, n.description) && safeEq(o.sourceType, n.sourceType) && o.date == n.date;
+            }
+        }).dispatchUpdatesTo(this);
+    }
+
+    private static boolean safeEq(Object a, Object b) {
+        return a == b || (a != null && a.equals(b));
+    }
+
+    public Income removeAt(int position) {
+        if (position < 0 || position >= items.size()) return null;
+        Income in = items.remove(position);
+        notifyItemRemoved(position);
+        return in;
+    }
+
+    public void restoreAt(int position, Income in) {
+        if (in == null) return;
+        if (position < 0 || position > items.size()) position = items.size();
+        items.add(position, in);
+        notifyItemInserted(position);
     }
 
     @Override
