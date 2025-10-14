@@ -11,6 +11,14 @@
         <item name="android:colorBackground">@color/brand_surface</item>
         <item name="colorOnBackground">@color/brand_on_surface</item>
 
+        <!-- Edge-to-edge window settings -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowContentTransitions">true</item>
+
         <!-- Activare suport dark -->
         <item name="android:forceDarkAllowed">true</item>
 
@@ -22,5 +30,9 @@
         <item name="cornerRadius">16dp</item>
         <item name="android:textAllCaps">false</item>
     </style>
+
+    <!-- Text appearances for lists -->
+    <style name="TextAppearance.FinanceApp.Title" parent="TextAppearance.Material3.TitleMedium"/>
+    <style name="TextAppearance.FinanceApp.Body" parent="TextAppearance.Material3.BodyMedium"/>
 
 </resources>

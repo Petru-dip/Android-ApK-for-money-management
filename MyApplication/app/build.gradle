@@ -79,4 +79,7 @@ dependencies {
 
     // MPAndroidChart (necesită JitPack în settings.gradle)
     implementation "com.github.PhilJay:MPAndroidChart:v3.1.0"
+
+    // CoordinatorLayout for FAB positioning
+    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
 }

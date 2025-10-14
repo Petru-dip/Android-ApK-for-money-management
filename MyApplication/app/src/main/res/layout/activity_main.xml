@@ -10,10 +10,10 @@
     android:background="?attr/colorSurface">
 
 
-    <LinearLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/content_root"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <!-- ✅ Toolbar sus -->
         <com.google.android.material.appbar.MaterialToolbar
@@ -29,6 +29,7 @@
 
 
         <ScrollView
+            android:id="@+id/scroll_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
@@ -46,8 +47,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="3dp"
+                    app:rippleColor="?attr/colorSecondary"
                     app:cardUseCompatPadding="true">
 
                     <LinearLayout
@@ -102,8 +106,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="3dp"
+                    app:rippleColor="?attr/colorSecondary"
                     app:cardUseCompatPadding="true">
 
                     <LinearLayout
@@ -255,7 +262,18 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
         </ScrollView>
-    </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_quick_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adaugă"
+            app:icon="@drawable/ic_expense"
+            app:iconTint="@android:color/white"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="Adaugă tranzacție"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <!-- ======= MENIU LATERAL ======= -->
     <com.google.android.material.navigation.NavigationView
