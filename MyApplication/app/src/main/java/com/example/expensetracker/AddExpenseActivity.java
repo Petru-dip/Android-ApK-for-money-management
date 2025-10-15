@@ -4,16 +4,32 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Toast;
 
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Locale;
 
 public class AddExpenseActivity extends AppCompatActivity {
+
+    protected void setupToolbar(@StringRes int titleRes, boolean showBack) {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_include);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            ActionBar ab = getSupportActionBar();
+            if (ab != null) {
+                ab.setTitle(titleRes);
+                ab.setDisplayHomeAsUpEnabled(showBack);
+            }
+        }
+    }
     private static final String TAG = "AddExpenseExtras";
 
     private EditText amountInput, descriptionInput, dateInput;
@@ -28,7 +44,7 @@ public class AddExpenseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_expense);
 
         // 2) Apoi setăm toolbar-ul (altfel risti NPE în setupToolbar)
-        setupToolbar(R.string.title_expenses, true);
+        setupToolbar(R.string.title_add_expenses, true);
 
         amountInput = findViewById(R.id.expense_amount);
         descriptionInput = findViewById(R.id.expense_description);
@@ -93,6 +109,7 @@ public class AddExpenseActivity extends AppCompatActivity {
         }
 
         // Butonul "auto save" a fost eliminat din layout pentru simplitate vizuală
+
     }
 
     /** Varianta strictă (comportamentul de până acum): cere sumă validă. */
@@ -206,8 +223,6 @@ public class AddExpenseActivity extends AppCompatActivity {
                 || t.contains("profi")     || t.contains("penny");
     }
 
-    // Presupunem că ai o metodă existentă de setup toolbar:
-    private void setupToolbar(int titleRes, boolean showBack) {
-        // implementarea ta existentă (findViewById după setContentView)
-    }
+    // metodă existentă de setup toolbar:
+
 }

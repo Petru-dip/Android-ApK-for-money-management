@@ -12,6 +12,7 @@
     <!-- Titluri ecrane -->
     <string name="title_expenses">Cheltuieli</string>
     <string name="title_incomes">Venituri</string>
+    <string name="title_add_expenses">Adaugǎ o Cheltuialǎ</string>
 
     <!-- Meniu drawer / manifest -->
     <string name="settings">Setări</string>

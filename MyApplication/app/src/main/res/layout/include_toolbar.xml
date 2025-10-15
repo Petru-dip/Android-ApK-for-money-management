@@ -8,4 +8,5 @@
     android:background="@drawable/toolbar_gradient"
     app:titleCentered="true"
     app:navigationIconTint="?attr/colorOnSurface"
-    app:titleTextColor="?attr/colorOnSurface"/>
+app:title="BrimTech Finance"
+app:titleTextColor="@android:color/white" />

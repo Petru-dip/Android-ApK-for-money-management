@@ -14,7 +14,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 public abstract class BaseActivity extends AppCompatActivity {
 
     protected void setupToolbar(@StringRes int titleRes, boolean showBack) {
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_include);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             ActionBar ab = getSupportActionBar();
