@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -53,17 +54,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Casă"/>
-    </com.google.android.material.chip.ChipGroup>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_expense_report"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Raport"
-        app:layout_constraintTop_toTopOf="@id/chips_expense"
-        app:layout_constraintBottom_toBottomOf="@id/chips_expense"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="16dp"/>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_expense_report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="228dp"
+            android:text="Raport" />
+    </com.google.android.material.chip.ChipGroup>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expense_recycler"
@@ -77,6 +75,18 @@
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/chips_expense"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <TextView
+        android:id="@+id/empty_view_incomes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_incomes_yet"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

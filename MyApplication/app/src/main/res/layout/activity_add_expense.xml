@@ -12,83 +12,78 @@
 		<!-- Toolbar comun -->
 		<include layout="@layout/include_toolbar"/>
 
+
+		<com.google.android.material.appbar.MaterialToolbar
+			android:layout_width="match_parent"
+			android:layout_height="?attr/actionBarSize"
+			android:background="?attr/colorPrimary"
+			app:title="BrimTech Finance"
+			app:titleCentered="true"
+			app:titleTextColor="@android:color/white" />
+
 		<com.google.android.material.textfield.TextInputLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="16dp"
-			app:boxBackgroundMode="outline"
-			app:boxStrokeColor="@color/revolut_blue"
-			app:boxStrokeWidth="1dp">
+			android:layout_marginTop="16dp">
 			<com.google.android.material.textfield.TextInputEditText
 				android:id="@+id/expense_amount"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="Sumă"
-				android:inputType="numberDecimal"/>
+				android:inputType="numberDecimal"
+				android:hint="@string/amount" />
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<com.google.android.material.textfield.TextInputLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp"
-			app:boxBackgroundMode="outline"
-			app:boxStrokeColor="@color/revolut_blue"
-			app:endIconMode="clear_text">
+			android:layout_marginTop="8dp">
 			<com.google.android.material.textfield.TextInputEditText
 				android:id="@+id/expense_description"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="Descriere"
-				android:inputType="textCapSentences"/>
+				android:hint="@string/description"/>
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<com.google.android.material.textfield.TextInputLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp"
-			app:boxBackgroundMode="outline"
-			app:boxStrokeColor="@color/revolut_blue"
-			app:endIconMode="custom"
-			app:endIconDrawable="@android:drawable/ic_menu_today">
+			android:layout_marginTop="8dp">
 			<com.google.android.material.textfield.TextInputEditText
 				android:id="@+id/expense_date"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="Data (dd.MM.yyyy)"
 				android:focusable="false"
-				android:clickable="true"/>
+				android:clickable="true"
+				android:hint="@string/date" />
 		</com.google.android.material.textfield.TextInputLayout>
 
+
+		<!-- CATEGORIE -->
 		<com.google.android.material.textfield.TextInputLayout
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp"
-			app:boxBackgroundMode="outline"
-			app:boxStrokeColor="@color/revolut_blue">
+			android:layout_marginTop="16dp">
+
 			<com.google.android.material.textfield.MaterialAutoCompleteTextView
 				android:id="@+id/expense_category"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="Categorie"
-				android:inputType="none"
-				android:entries="@array/expense_categories"/>
+				android:hint="@array/type_sursa" />
 		</com.google.android.material.textfield.TextInputLayout>
 
-		<!-- Exposed dropdown for type -->
+		<!-- TIP (PERSONAL / FIRMĂ) -->
 		<com.google.android.material.textfield.TextInputLayout
+			style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp"
-			app:boxBackgroundMode="outline"
-			app:boxStrokeColor="@color/revolut_blue"
-			app:endIconMode="dropdown_menu">
+			android:layout_marginTop="12dp">
+
 			<com.google.android.material.textfield.MaterialAutoCompleteTextView
 				android:id="@+id/expense_type_spinner"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="Tip (Personal/Firmă)"
-				android:inputType="none"
-				android:entries="@array/type_personal_firma"/>
+				android:hint="@array/type_personal_firma" />
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<com.google.android.material.button.MaterialButton

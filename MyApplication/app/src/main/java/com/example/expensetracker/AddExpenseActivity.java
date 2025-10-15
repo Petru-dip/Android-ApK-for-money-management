@@ -46,6 +46,7 @@ public class AddExpenseActivity extends AppCompatActivity {
         );
         categoryInput.setAdapter(catAdapter);
 
+
         dateInput.setText(DatePickerUtil.today());
         DatePickerUtil.attach(this, dateInput);
 

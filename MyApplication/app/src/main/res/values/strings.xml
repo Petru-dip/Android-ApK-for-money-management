@@ -28,6 +28,25 @@
         <item>FIRMA</item>
     </string-array>
 
+
+    <!-- Spinner tip -->
+    <string-array name="type_sursa">
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+
+    </string-array>
+    <string-array name="type_all_sursa">
+        <item>Toate</item>
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+    </string-array>
+
     <!-- Perioade comune -->
     <string-array name="periods_common">
         <item>Azi</item>
