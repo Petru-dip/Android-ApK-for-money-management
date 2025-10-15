@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -22,8 +22,9 @@ import java.util.Locale;
  */
 public class EditExpenseActivity extends BaseActivity {
 
-    private EditText amountInput, descriptionInput, dateInput, categoryInput;
-    private Spinner typeSpinner;
+    private EditText amountInput, descriptionInput, dateInput;
+    private MaterialAutoCompleteTextView categoryInput;
+    private MaterialAutoCompleteTextView typeSpinner;
 
     /** Modelul curent încărcat din DB și editat în UI. */
     private Expense currentExpense;
@@ -42,11 +43,14 @@ public class EditExpenseActivity extends BaseActivity {
         categoryInput    = findViewById(R.id.expense_category);
         typeSpinner      = findViewById(R.id.expense_type_spinner);
 
-        // Spinner PERSONAL/FIRMA
+        // Dropdown PERSONAL/FIRMA
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.type_personal_firma, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                this, R.array.type_personal_firma, android.R.layout.simple_list_item_1);
         typeSpinner.setAdapter(adapter);
+
+        ArrayAdapter<CharSequence> catAdapter = ArrayAdapter.createFromResource(
+                this, R.array.expense_categories, android.R.layout.simple_list_item_1);
+        categoryInput.setAdapter(catAdapter);
 
         // Date picker helper din proiect
         DatePickerUtil.attach(this, dateInput);
@@ -100,7 +104,8 @@ public class EditExpenseActivity extends BaseActivity {
 
         String type = e.categoryType == null ? "PERSONAL" : e.categoryType;
         int pos = "FIRMA".equalsIgnoreCase(type) ? 1 : 0;
-        typeSpinner.setSelection(pos);
+        String typedText = pos == 1 ? "FIRMA" : "PERSONAL";
+        typeSpinner.setText(typedText, false);
     }
 
     /** Salvează modificările în DB (UPDATE). */
@@ -120,9 +125,9 @@ public class EditExpenseActivity extends BaseActivity {
         String desc = descriptionInput.getText().toString().trim();
         String dateStr = dateInput.getText().toString().trim();
         long dateMillis = DatePickerUtil.parse(dateStr); // există deja în proiect
-        String category = categoryInput.getText().toString().trim();
-        String type = typeSpinner.getSelectedItem() != null
-                ? typeSpinner.getSelectedItem().toString()
+        String category = categoryInput.getText() == null ? "" : categoryInput.getText().toString().trim();
+        String type = typeSpinner.getText() != null && !typeSpinner.getText().toString().isEmpty()
+                ? typeSpinner.getText().toString()
                 : "PERSONAL";
 
         // Reflectă în model

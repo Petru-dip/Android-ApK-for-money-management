@@ -16,16 +16,7 @@
         android:orientation="vertical">
 
         <!-- ✅ Toolbar sus -->
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:title="BrimTech Finance"
-            app:titleCentered="true"
-            app:titleTextColor="@android:color/white"
-            app:navigationIcon="@drawable/ic_menu"
-            app:menu="@menu/top_menu" />
+        <include layout="@layout/include_toolbar"/>
 
 
         <ScrollView

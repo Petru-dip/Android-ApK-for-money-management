@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Toast;
 
 // NU mai importa AppCompatActivity aici; clasa extinde BaseActivity
@@ -13,7 +13,7 @@ import android.widget.Toast;
 public class IncomeActivity extends BaseActivity {
 
     private EditText amountInput, descriptionInput, dateInput;
-    private Spinner sourceTypeSpinner;
+    private MaterialAutoCompleteTextView sourceTypeSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +30,10 @@ public class IncomeActivity extends BaseActivity {
         dateInput = findViewById(R.id.income_date);
         sourceTypeSpinner = findViewById(R.id.income_source_type);
 
-        // spinner PERSONAL / FIRMA (asigură-te că ai arrays.xml mai jos)
+        // dropdown categorii venit (Salariu/Bonus/Familie/Primit)
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.type_personal_firma, android.R.layout.simple_spinner_item
+                this, R.array.income_categories, android.R.layout.simple_list_item_1
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sourceTypeSpinner.setAdapter(adapter);
 
         dateInput.setText(DatePickerUtil.today());
@@ -63,7 +62,9 @@ public class IncomeActivity extends BaseActivity {
         String dateStr = dateInput.getText().toString().trim();
         long dateMillis = DatePickerUtil.parse(dateStr);
 
-        String sourceType = String.valueOf(sourceTypeSpinner.getSelectedItem()); // "PERSONAL"/"FIRMA"
+        String sourceType = sourceTypeSpinner.getText() == null
+                ? "PERSONAL"
+                : sourceTypeSpinner.getText().toString(); // "PERSONAL"/"FIRMA"
 
         Income income = new Income();
         income.amount = amount;

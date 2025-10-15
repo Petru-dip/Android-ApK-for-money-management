@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/Theme.FinanceApp">
+        android:theme="@style/Theme.FinanceApp"
+        android:enableOnBackInvokedCallback="true">
 
         <!-- Launcher -->
         <activity
@@ -55,6 +56,10 @@
         <!-- Rapoarte / setări / despre -->
         <activity
             android:name=".ExpenseReportActivity"
+            android:exported="false"
+            android:label="@string/view_by_category" />
+        <activity
+            android:name=".ReportActivity"
             android:exported="false"
             android:label="@string/view_by_category" />
         <activity

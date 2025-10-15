@@ -4,8 +4,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.ArrayAdapter;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,8 +16,9 @@ import java.util.Locale;
 public class AddExpenseActivity extends AppCompatActivity {
     private static final String TAG = "AddExpenseExtras";
 
-    private EditText amountInput, descriptionInput, dateInput, categoryInput;
-    private Spinner typeSpinner;
+    private EditText amountInput, descriptionInput, dateInput;
+    private MaterialAutoCompleteTextView categoryInput;
+    private MaterialAutoCompleteTextView typeSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +36,15 @@ public class AddExpenseActivity extends AppCompatActivity {
         categoryInput = findViewById(R.id.expense_category);
         typeSpinner = findViewById(R.id.expense_type_spinner);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.type_personal_firma, android.R.layout.simple_spinner_item
+        ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
+                this, R.array.type_personal_firma, android.R.layout.simple_list_item_1
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        typeSpinner.setAdapter(adapter);
+        typeSpinner.setAdapter(typeAdapter);
+
+        ArrayAdapter<CharSequence> catAdapter = ArrayAdapter.createFromResource(
+                this, R.array.expense_categories, android.R.layout.simple_list_item_1
+        );
+        categoryInput.setAdapter(catAdapter);
 
         dateInput.setText(DatePickerUtil.today());
         DatePickerUtil.attach(this, dateInput);
@@ -85,10 +91,7 @@ public class AddExpenseActivity extends AppCompatActivity {
             save.setOnClickListener(v -> onSaveStrict());
         }
 
-        Button autoSave = findViewById(R.id.btn_auto_save);
-        if (autoSave != null) {
-            autoSave.setOnClickListener(v -> onAutoSave());
-        }
+        // Butonul "auto save" a fost eliminat din layout pentru simplitate vizuală
     }
 
     /** Varianta strictă (comportamentul de până acum): cere sumă validă. */
@@ -144,8 +147,10 @@ public class AddExpenseActivity extends AppCompatActivity {
         if (dateMillis == 0L) {
             dateMillis = System.currentTimeMillis(); // fallback sigur
         }
-        String category = categoryInput.getText().toString().trim();
-        String type = (String) typeSpinner.getSelectedItem(); // PERSONAL / FIRMA
+        String category = categoryInput.getText() == null ? "" : categoryInput.getText().toString().trim();
+        String type = typeSpinner.getText() != null && !typeSpinner.getText().toString().isEmpty()
+                ? typeSpinner.getText().toString()
+                : "PERSONAL"; // PERSONAL / FIRMA
 
         Expense ex = new Expense();
         ex.amount = amount;

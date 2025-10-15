@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.annotation.SuppressLint;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,6 +58,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
 
     static class VH extends RecyclerView.ViewHolder {
         final TextView tvDesc, tvCategory, tvAmount, tvDate;
+        final ImageView ivIcon;
         final ImageButton btnEdit, btnDelete;
         final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
 
@@ -68,6 +70,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
             tvDate     = itemView.findViewById(R.id.tvDate);
             btnEdit    = itemView.findViewById(R.id.btnEdit);
             btnDelete  = itemView.findViewById(R.id.btnDelete);
+            ivIcon     = itemView.findViewById(R.id.ivIcon);
         }
 
         void bind(Expense e) {
@@ -76,6 +79,15 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.VH> {
             tvCategory.setText(e.category != null ? e.category : "");
             tvAmount.setText(String.format(Locale.getDefault(), "%.2f RON", e.amount));
             tvDate.setText(df.format(new java.util.Date(e.date)));
+
+            // category icon mapping
+            int iconRes = android.R.drawable.ic_menu_info_details;
+            String c = e.category == null ? "" : e.category.toLowerCase(Locale.getDefault());
+            if (c.contains("mancare") || c.contains("alimente")) iconRes = android.R.drawable.ic_menu_crop;
+            else if (c.contains("sanatate")) iconRes = android.R.drawable.ic_menu_help;
+            else if (c.contains("transport")) iconRes = android.R.drawable.ic_menu_directions;
+            else if (c.contains("casa") || c.contains("chir")) iconRes = android.R.drawable.ic_menu_manage;
+            ivIcon.setImageResource(iconRes);
         }
     }
 }

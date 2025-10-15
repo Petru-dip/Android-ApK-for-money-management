@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -52,6 +53,15 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
         h.tvAmount.setText(String.format(Locale.getDefault(), "%.2f RON", in.amount));
         h.tvDate.setText(formatDate(in.date));
 
+        int iconRes = android.R.drawable.ic_menu_info_details;
+        String src = in.sourceType == null ? "" : in.sourceType.toLowerCase(Locale.getDefault());
+        String desc = in.description == null ? "" : in.description.toLowerCase(Locale.getDefault());
+        if (src.contains("salariu") || desc.contains("salariu")) iconRes = android.R.drawable.ic_menu_my_calendar;
+        else if (src.contains("bonus") || desc.contains("bonus")) iconRes = android.R.drawable.star_on;
+        else if (src.contains("familie") || desc.contains("familie")) iconRes = android.R.drawable.ic_menu_share;
+        else if (src.contains("primit") || desc.contains("cadou") || desc.contains("transfer")) iconRes = android.R.drawable.ic_input_add;
+        h.ivIcon.setImageResource(iconRes);
+
         h.itemView.setOnClickListener(v -> { if (listener != null) listener.onOpen(in); });
         h.btnEdit.setOnClickListener(v -> { if (listener != null) listener.onEdit(in); });
         h.btnDelete.setOnClickListener(v -> { if (listener != null) listener.onDelete(in); });
@@ -63,6 +73,7 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
     static class VH extends RecyclerView.ViewHolder {
         TextView tvDesc, tvSource, tvAmount, tvDate;
         ImageButton btnEdit, btnDelete;
+        ImageView ivIcon;
         VH(@NonNull View itemView) {
             super(itemView);
             tvDesc   = itemView.findViewById(R.id.tvDesc);
@@ -71,6 +82,7 @@ public class IncomeAdapter extends RecyclerView.Adapter<IncomeAdapter.VH> {
             tvDate   = itemView.findViewById(R.id.tvDate);
             btnEdit  = itemView.findViewById(R.id.btnEdit);
             btnDelete= itemView.findViewById(R.id.btnDelete);
+            ivIcon   = itemView.findViewById(R.id.ivIcon);
         }
     }
 

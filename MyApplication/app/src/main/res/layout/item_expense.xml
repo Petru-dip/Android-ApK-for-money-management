@@ -1,60 +1,82 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:foreground="?attr/selectableItemBackground"
+    android:layout_margin="8dp"
     android:clickable="true"
-    android:longClickable="true">
-
-    <TextView
-        android:id="@+id/tvDesc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:text="Descriere" />
-
-    <TextView
-        android:id="@+id/tvCategory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cumpărături" />
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingTop="6dp">
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tvAmount"
+        <ImageView
+            android:id="@+id/ivIcon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="@string/app_name"
+            android:src="@android:drawable/ic_menu_info_details"/>
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="0.00 RON" />
+            android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvDesc"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
-            android:text="01.01.2025" />
+            android:textStyle="bold"
+            android:text="Descriere" />
 
-        <ImageButton
-            android:id="@+id/btnEdit"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/edit"
-            android:src="@android:drawable/ic_menu_edit" />
+        <TextView
+            android:id="@+id/tvCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cumpărături" />
 
-        <ImageButton
-            android:id="@+id/btnDelete"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/delete"
-            android:src="@android:drawable/ic_menu_delete" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/tvAmount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0.00 RON" />
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:text="01.01.2025" />
+
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/edit"
+                android:src="@android:drawable/ic_menu_edit" />
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/delete"
+                android:src="@android:drawable/ic_menu_delete" />
+        </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

@@ -6,6 +6,59 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chips_income"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:singleSelection="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_all"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Toate"
+            android:checked="true"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_salary"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Salariu"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_bonus"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bonus"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_family"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Familie"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_received"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Primit"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_income_report"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Raport"
+        app:layout_constraintTop_toTopOf="@id/chips_income"
+        app:layout_constraintBottom_toBottomOf="@id/chips_income"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="16dp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_incomes"
         android:layout_width="0dp"
@@ -17,7 +70,7 @@
         android:paddingBottom="8dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chips_income"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

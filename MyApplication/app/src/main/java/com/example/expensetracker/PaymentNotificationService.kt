@@ -19,8 +19,9 @@ import kotlin.String
 
 class PaymentNotificationService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        val pkg = sbn.getPackageName()
-        if (pkg == null || !pkg.lowercase().contains("revolut")) return
+        val pkg = sbn.getPackageName() ?: return
+        val lowers = pkg.lowercase()
+        if (!(lowers.contains("revolut") || lowers.contains("walletnfcrel") || lowers.contains("btpay"))) return
 
         val e = sbn.getNotification().extras
         val titleCs = e.getCharSequence(Notification.EXTRA_TITLE)
@@ -33,6 +34,10 @@ class PaymentNotificationService : NotificationListenerService() {
         var merchant = extractMerchant(title, text)
         var category = guessCategoryFromMerchant(merchant)
 
+        // semn venit/cheltuială
+        val isIncome = Regex("(?i)\b(received|primit|salary|salariu|bonus|refund|ramburs)\b")
+            .containsMatchIn("$title $text")
+
         // fallback-uri cerute
         if (Double.isNaN(amount) || amount <= 0) amount = 1.01 // „01.01” ca sumă fallback
 
@@ -43,23 +48,37 @@ class PaymentNotificationService : NotificationListenerService() {
         val autoOn = isAutoSaveOn(this)
 
         if (autoOn) {
-            // === AUTO: salvăm direct în DB, fără UI ===
-            val ex = Expense()
-            ex.amount = amount
-            ex.description = if (merchant.isEmpty()) "Revolut" else merchant
-            ex.date =
-                System.currentTimeMillis() // dacă vrei „01.01” ca DATĂ fallback: DatePickerUtil.parse("01.01")
-            ex.category = if (category.isEmpty()) "AUTO" else category
-            ex.categoryType = "PERSONAL"
-            ex.uid = UUID.randomUUID().toString()
-
-            Thread(Runnable {
-                AppDatabase.getInstance(getApplicationContext()).expenseDao().insert(ex)
-                showSavedNotification(
-                    "Cheltuială salvată",
-                    String.format(Locale.ROOT, "%.2f %s – %s", amount, currency, ex.description)
-                )
-            }).start()
+            // === AUTO: salvează în DB ca venit sau cheltuială ===
+            if (isIncome) {
+                val inc = Income()
+                inc.amount = kotlin.math.abs(amount)
+                inc.description = if (merchant.isEmpty()) "Auto" else merchant
+                inc.date = System.currentTimeMillis()
+                inc.sourceType = pickIncomeType("$title $text")
+                inc.uid = UUID.randomUUID().toString()
+                Thread {
+                    AppDatabase.getInstance(applicationContext).incomeDao().insert(inc)
+                    showSavedNotification(
+                        "Venit salvat",
+                        String.format(Locale.ROOT, "%.2f %s – %s", inc.amount, currency, inc.description)
+                    )
+                }.start()
+            } else {
+                val ex = Expense()
+                ex.amount = kotlin.math.abs(amount)
+                ex.description = if (merchant.isEmpty()) "Auto" else merchant
+                ex.date = System.currentTimeMillis()
+                ex.category = if (category.isEmpty()) guessCategoryFromText("$title $text") ?: "AUTO" else category
+                ex.categoryType = "PERSONAL"
+                ex.uid = UUID.randomUUID().toString()
+                Thread {
+                    AppDatabase.getInstance(applicationContext).expenseDao().insert(ex)
+                    showSavedNotification(
+                        "Cheltuială salvată",
+                        String.format(Locale.ROOT, "%.2f %s – %s", ex.amount, currency, ex.description)
+                    )
+                }.start()
+            }
         } else {
             // === MANUAL: deschidem app cu prefill (MainActivity -> AddExpenseActivity) ===
             // Lăsăm fluxul tău existent din MainActivity.handleExpensePrefillIntent
@@ -123,6 +142,26 @@ class PaymentNotificationService : NotificationListenerService() {
         if (m.contains("uber") || m.contains("bolt")) return "Transport"
         if (m.contains("mc") || m.contains("kfc") || m.contains("pizza")) return "Mancare"
         return null
+    }
+
+    private fun guessCategoryFromText(text: String): String? {
+        val t = text.lowercase()
+        if (Regex("(?i)\b(mâncare|mancare|supermarket|restaurant|pizza|mc|kfc|lidl|kaufland|carrefour)\b").containsMatchIn(t)) return "Mâncare"
+        if (Regex("(?i)\b(farmacie|spital|sanatate|sănătate)\b").containsMatchIn(t)) return "Sănătate"
+        if (Regex("(?i)\b(uber|bolt|transport|taxi|bilet)\b").containsMatchIn(t)) return "Transport"
+        if (Regex("(?i)\b(chirie|utilități|gaz|curent|apa|casă|casa)\b").containsMatchIn(t)) return "Casă"
+        return null
+    }
+
+    private fun pickIncomeType(text: String): String {
+        val t = text.lowercase()
+        return when {
+            t.contains("salariu") || t.contains("salary") -> "Salariu"
+            t.contains("bonus") -> "Bonus"
+            t.contains("familie") || t.contains("family") -> "Familie"
+            t.contains("primit") || t.contains("received") || t.contains("transfer") -> "Primit"
+            else -> "Altele"
+        }
     }
 
     private fun showSavedNotification(title: String?, text: String?) {

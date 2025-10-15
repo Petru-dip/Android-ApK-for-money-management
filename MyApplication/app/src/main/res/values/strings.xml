@@ -35,6 +35,22 @@
         <item>Luna curentă</item>
         <item>Ultimele 30 zile</item>
     </string-array>
+
+    <!-- Categorii predefinite -->
+    <string-array name="expense_categories">
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+    </string-array>
+    <string-array name="income_categories">
+        <item>Salariu</item>
+        <item>Bonus</item>
+        <item>Familie</item>
+        <item>Primit</item>
+        <item>Altele</item>
+    </string-array>
     <string name="edit">Editează</string>
     <string name="delete">Șterge</string>
     <string name="cancel">Anulează</string>
