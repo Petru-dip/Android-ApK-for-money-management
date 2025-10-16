@@ -54,7 +54,7 @@ class PaymentNotificationService : NotificationListenerService() {
                 inc.amount = kotlin.math.abs(amount)
                 inc.description = if (merchant.isEmpty()) "Auto" else merchant
                 inc.date = System.currentTimeMillis()
-                inc.sourceType = pickIncomeType("$title $text")
+                inc.categoryType = pickIncomeType("$title $text")
                 inc.uid = UUID.randomUUID().toString()
                 Thread {
                     AppDatabase.getInstance(applicationContext).incomeDao().insert(inc)

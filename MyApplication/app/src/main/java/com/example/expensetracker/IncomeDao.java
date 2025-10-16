@@ -36,10 +36,10 @@ public interface IncomeDao {
     @Query("SELECT SUM(amount) FROM Income")
     Double getTotalAmount();
 
-    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :type")
+    @Query("SELECT SUM(amount) FROM Income WHERE categoryType = :type")
     Double getTotalBySourceType(String type); // ex. "FIRMA" sau "PERSONAL"
 
-    @Query("SELECT SUM(amount) FROM Income WHERE sourceType = :type AND date BETWEEN :from AND :to")
+    @Query("SELECT SUM(amount) FROM Income WHERE categoryType = :type AND date BETWEEN :from AND :to")
     Double getTotalByTypeAndDate(String type, long from, long to);
 
     // pentru UidBackfill

@@ -18,6 +18,9 @@ public class Income {
     public String description;
     /** Unix millis */
     public long date;
+    public String category;
     /** "PERSONAL" sau "FIRMA" */
+    public String categoryType;
+    /** "PERSONAL" sau "FIRMA" sau alt tip de sursă (ex: salariu, pensie, etc.) */
     public String sourceType;
 }

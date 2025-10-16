@@ -9,11 +9,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class EditIncomeActivity extends BaseActivity {
 
-    private EditText amountInput, descriptionInput, dateInput, sourceInput;
-    private Spinner typeSpinner;
 
+
+    private EditText amountInput, descriptionInput, dateInput;
+    private MaterialAutoCompleteTextView categoryInput;
+    private Spinner typeSpinner;
     private Income currentIncome;
 
     @Override
@@ -27,7 +35,7 @@ public class EditIncomeActivity extends BaseActivity {
         amountInput      = findViewById(R.id.income_amount);
         descriptionInput = findViewById(R.id.income_description);
         dateInput        = findViewById(R.id.income_date);
-        sourceInput      = findViewById(R.id.income_source);
+        categoryInput      = findViewById(R.id.income_category);
         typeSpinner      = findViewById(R.id.income_type_spinner);
 
         // spinner PERSONAL/FIRMA
@@ -36,7 +44,17 @@ public class EditIncomeActivity extends BaseActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         typeSpinner.setAdapter(adapter);
 
+        ArrayAdapter<CharSequence> catAdapter = ArrayAdapter.createFromResource(
+                this, R.array.expense_categories, android.R.layout.simple_list_item_1);
+        categoryInput.setAdapter(catAdapter);
+
+
+
         DatePickerUtil.attach(this, dateInput);
+
+
+
+
 
         // extras
         int id = getIntent().getIntExtra("income_id", -1);
@@ -51,13 +69,14 @@ public class EditIncomeActivity extends BaseActivity {
             } else if (uid != null && !uid.isEmpty()) {
                 loaded = db.incomeDao().getByUid(uid);
             }
-            Income finalLoaded = loaded;
+            final Income result = loaded;
             runOnUiThread(() -> {
-                if (finalLoaded == null) {
+                if (result == null) {
+                    Toast.makeText(this, "Înregistrarea nu a fost găsită.", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    currentIncome = finalLoaded;
-                    populateFormFromModel();
+                    currentIncome = result;
+                    populateFormFromModel(result);
                 }
             });
         }).start();
@@ -69,13 +88,14 @@ public class EditIncomeActivity extends BaseActivity {
         if (delete != null) delete.setOnClickListener(v -> confirmDelete());
     }
 
-    private void populateFormFromModel() {
-        amountInput.setText(String.valueOf(currentIncome.amount));
-        descriptionInput.setText(currentIncome.description == null ? "" : currentIncome.description);
-        dateInput.setText(DatePickerUtil.format(currentIncome.date));
-        sourceInput.setText(currentIncome.sourceType == null ? "" : currentIncome.sourceType);
+    /** Populează UI din modelul încărcat. */
+    private void populateFormFromModel(Income e) {
+        amountInput.setText(String.valueOf(e.amount));
+        descriptionInput.setText(e.description == null ? "" : e.description);
+        dateInput.setText(formatDate(e.date));
+        categoryInput.setText(e.category == null ? "" : e.category, false);
 
-        String type = currentIncome.sourceType == null ? "PERSONAL" : currentIncome.sourceType;
+        String type = e.categoryType == null ? "PERSONAL" : e.categoryType;
         int pos = "FIRMA".equalsIgnoreCase(type) ? 1 : 0;
         typeSpinner.setSelection(pos);
     }
@@ -95,15 +115,18 @@ public class EditIncomeActivity extends BaseActivity {
         String desc = descriptionInput.getText().toString().trim();
         String dateStr = dateInput.getText().toString().trim();
         long dateMillis = DatePickerUtil.parse(dateStr);
-        String source = sourceInput.getText().toString().trim();
-        String type = typeSpinner.getSelectedItem() == null ? "PERSONAL"
-                : typeSpinner.getSelectedItem().toString();
+        String category = categoryInput.getText() == null ? "" : categoryInput.getText().toString().trim();
+        String type = typeSpinner.getSelectedItem() != null
+                ? typeSpinner.getSelectedItem().toString()
+                : "PERSONAL";
 
         currentIncome.amount = amount;
         currentIncome.description = desc;
         currentIncome.date = dateMillis;
+        currentIncome.category = category;
+        currentIncome.categoryType = type;
         // la tine "tipul" sursei e stocat în sourceType
-        currentIncome.sourceType = (source.isEmpty() ? type : source);
+//        currentIncome.sourceType = (source.isEmpty() ? type : source);
 
         new Thread(() -> {
             AppDatabase.getInstance(getApplicationContext())
@@ -134,5 +157,10 @@ public class EditIncomeActivity extends BaseActivity {
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
+    }
+    private String formatDate(long millis) {
+        if (millis <= 0) return DatePickerUtil.today(); // fallback
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+        return sdf.format(new Date(millis));
     }
 }

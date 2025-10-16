@@ -28,13 +28,20 @@ public class AddExpenseActivity extends AppCompatActivity {
                 ab.setTitle(titleRes);
                 ab.setDisplayHomeAsUpEnabled(showBack);
             }
+
+            if (showBack) {
+                toolbar.setNavigationOnClickListener(v -> finish());
+            }
         }
     }
+
     private static final String TAG = "AddExpenseExtras";
 
     private EditText amountInput, descriptionInput, dateInput;
     private MaterialAutoCompleteTextView categoryInput;
     private MaterialAutoCompleteTextView typeSpinner;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

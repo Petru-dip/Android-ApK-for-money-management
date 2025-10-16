@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
-    android:layout_height="match_parent">
+	android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="16dp">
 
 		<com.google.android.material.appbar.MaterialToolbar
 			android:layout_width="match_parent"
@@ -17,7 +17,6 @@
 			app:title="BrimTech Finance"
 			app:titleCentered="true"
 			app:titleTextColor="@android:color/white" />
-
 
 		<com.google.android.material.textfield.TextInputLayout
 			android:layout_width="match_parent"
@@ -39,7 +38,7 @@
 				android:id="@+id/income_description"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:hint="@string/description" />
+				android:hint="@string/description"/>
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<com.google.android.material.textfield.TextInputLayout
@@ -55,42 +54,32 @@
 				android:hint="@string/date" />
 		</com.google.android.material.textfield.TextInputLayout>
 
-		<com.google.android.material.textfield.TextInputLayout
+
+		<Spinner
+			android:id="@+id/income_category"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp">
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/income_source"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/source_optional" />
-		</com.google.android.material.textfield.TextInputLayout>
+			android:layout_height="50dp"
+			android:entries="@array/income_categories"
+			android:layout_marginTop="20dp" />
 
 		<Spinner
 			android:id="@+id/income_type_spinner"
 			android:layout_width="match_parent"
+			android:layout_height="50dp"
+			android:entries="@array/type_personal_firma"
+			android:layout_marginTop="20dp" />
+		<Button
+			android:id="@+id/btn_save_income"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="8dp" />
+			android:text="Salvează modificările"
+			android:layout_marginTop="60dp" />
+		<Button
+			android:id="@+id/btn_delete_income"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="Șterge"
+			android:layout_marginTop="16dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:paddingTop="12dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_delete_income"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/delete" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_save_income"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="@string/save" />
-        </LinearLayout>
-    </LinearLayout>
+	</LinearLayout>
 </ScrollView>

@@ -4,16 +4,37 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import android.widget.Toast;
+
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBar;
 
 // NU mai importa AppCompatActivity aici; clasa extinde BaseActivity
 // import androidx.appcompat.app.AppCompatActivity;
 
 public class IncomeActivity extends BaseActivity {
 
+
+    protected void setupToolbar(@StringRes int titleRes, boolean showBack) {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar_include);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            ActionBar ab = getSupportActionBar();
+            if (ab != null) {
+                ab.setTitle(titleRes);
+                ab.setDisplayHomeAsUpEnabled(showBack);
+            }
+
+            if (showBack) {
+                toolbar.setNavigationOnClickListener(v -> finish());
+            }
+        }
+    }
     private EditText amountInput, descriptionInput, dateInput;
-    private MaterialAutoCompleteTextView sourceTypeSpinner;
+    private MaterialAutoCompleteTextView sourceTypeSpinner, typeSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,13 +49,19 @@ public class IncomeActivity extends BaseActivity {
         amountInput = findViewById(R.id.income_amount);
         descriptionInput = findViewById(R.id.income_description);
         dateInput = findViewById(R.id.income_date);
-        sourceTypeSpinner = findViewById(R.id.income_source_type);
+        sourceTypeSpinner = findViewById(R.id.income_source);
+        typeSpinner = findViewById(R.id.income_source_type);
 
         // dropdown categorii venit (Salariu/Bonus/Familie/Primit)
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.income_categories, android.R.layout.simple_list_item_1
         );
         sourceTypeSpinner.setAdapter(adapter);
+
+        ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
+                this, R.array.type_personal_firma, android.R.layout.simple_list_item_1
+        );
+        typeSpinner.setAdapter(typeAdapter);
 
         dateInput.setText(DatePickerUtil.today());
         DatePickerUtil.attach(this, dateInput);
