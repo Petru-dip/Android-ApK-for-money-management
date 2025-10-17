@@ -11,6 +11,11 @@ import java.util.List;
 @Dao
 public interface IncomeDao {
 
+
+    @Query("SELECT SUM(amount) FROM `Income` WHERE categoryType = :type")
+    Double getTotalBySourceType(String type);
+
+
     @Query("SELECT * FROM income ORDER BY date DESC")
     List<Income> getAll();
 
@@ -40,7 +45,12 @@ public interface IncomeDao {
     @Query("SELECT SUM(amount) FROM income WHERE categoryType = :type AND date BETWEEN :from AND :to")
     Double getTotalByTypeAndDate(String type, long from, long to);
 
+
     // folosit de UidBackfill
     @Query("SELECT * FROM income WHERE uid IS NULL OR uid = ''")
     List<Income> getMissingUid();
+
+
+
+
 }

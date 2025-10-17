@@ -43,7 +43,7 @@
             android:exported="false"
             android:label="@string/title_add_expenses" />
         <activity
-            android:name=".IncomeActivity"
+            android:name=".AddIncomeActivity"
             android:exported="false"
             android:label="@string/title_incomes" />
         <activity

@@ -80,7 +80,7 @@ public class MainActivity extends BaseActivity {
                                 runOnUiThread(() -> {
                                     if (pending.hasDuplicates()) {
                                         String msg = "Am găsit " + pending.duplicateExpenses + " cheltuieli și "
-                                                /*+ pending.duplicateIncomes */+ " venituri care există deja în aplicație.\n\n"
+                                                + pending.duplicateIncomes + " venituri care există deja în aplicație.\n\n"
                                                 + "Cum vrei să continui?";
                                         new AlertDialog.Builder(this)
                                                 .setTitle("Import Excel – duplicate detectate")
@@ -198,7 +198,7 @@ public class MainActivity extends BaseActivity {
         if (btnIncome != null) {
             btnIncome.setOnClickListener(v -> {
                 v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-//                startActivity(new Intent(this, IncomeActivity.class));
+                startActivity(new Intent(this, AddIncomeActivity.class));
             });
         }
 
@@ -250,7 +250,7 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(this, ExpenseListActivity.class));
             return true;
         } else if (id == R.id.nav_incomes) {
-//            startActivity(new Intent(this, IncomeListActivity.class));
+            startActivity(new Intent(this, IncomeListActivity.class));
             return true;
         } else if (id == R.id.nav_reports) {
             startActivity(new Intent(this, ExpenseReportActivity.class));
@@ -290,32 +290,32 @@ public class MainActivity extends BaseActivity {
 
             switch (currentFilter) {
                 case ALL -> {
-//                    Double inc = db.incomeDao().getTotalAmount();   // era double totalIncome = ...
+                    Double inc = db.incomeDao().getTotalAmount();
                     Double exp = db.expenseDao().getTotalAmount();
 //                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case FIRMA -> {
-//                    Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
+                    Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
                     Double exp = db.expenseDao().getTotalByCategoryType("FIRMA");
 //                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case PERSONAL -> {
-//                    Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
+                    Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
                     Double exp = db.expenseDao().getTotalByCategoryType("PERSONAL");
 //                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
             }
 
-//            final double fIncome = totalIncome;
+            final double fIncome = totalIncome;
             final double fExpense = totalExpense;
-            final double balance = /*fIncome - */fExpense;
+            final double balance = fIncome - fExpense;
 
             runOnUiThread(() -> {
-//                animateText(tvIncome, String.format(Locale.getDefault(),
-//                        "Venituri totale: %.2f lei", fIncome));
+                animateText(tvIncome, String.format(Locale.getDefault(),
+                        "Venituri totale: %.2f lei", fIncome));
                 animateText(tvExpense, String.format(Locale.getDefault(),
                         "Cheltuieli totale: %.2f lei", fExpense));
 

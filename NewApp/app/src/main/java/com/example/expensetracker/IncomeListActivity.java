@@ -1,3 +1,4 @@
+// java
 package com.example.expensetracker;
 
 import android.content.Intent;
@@ -14,8 +15,8 @@ import java.util.List;
 public class IncomeListActivity extends BaseActivity {
 
     private RecyclerView recycler;
-    private ExpenseAdapter adapter;
-    private List<Expense> fullData;
+    private IncomeAdapter adapter;
+    private List<Income> fullData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,7 +27,7 @@ public class IncomeListActivity extends BaseActivity {
 
         recycler = findViewById(R.id.income_recycler);
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ExpenseAdapter();
+        adapter = new IncomeAdapter();
         recycler.setAdapter(adapter);
 
         adapter.setListener(new IncomeAdapter.Listener() {
@@ -133,8 +134,8 @@ public class IncomeListActivity extends BaseActivity {
         StringBuilder sb = new StringBuilder();
         for (java.util.Map.Entry<String, Double> it : sums.entrySet()) {
             sb.append(it.getKey()).append(": ")
-              .append(String.format(java.util.Locale.getDefault(), "%.2f RON", it.getValue()))
-              .append("\n");
+                    .append(String.format(java.util.Locale.getDefault(), "%.2f RON", it.getValue()))
+                    .append("\n");
         }
         new AlertDialog.Builder(this)
                 .setTitle("Raport cheltuieli pe categorie")

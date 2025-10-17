@@ -40,31 +40,33 @@ public class ExportImportUtils {
     /** Pachetul de date citite din Excel (încă nescrise în DB) + număr duplicate. */
     public static class PendingExcelImport {
         public final List<Expense> expenses;
-//        public final List<Income> incomes;
+        public final List<Income> incomes;
         public final int duplicateExpenses;
-//        public final int duplicateIncomes;
+        public final int duplicateIncomes;
 
         public PendingExcelImport(List<Expense> expenses,
-                                  int duplicateExpenses
-                                  /*,int duplicateIncomes*/) {
+                                  List<Income> incomes,
+                                  int duplicateExpenses,
+                                  int duplicateIncomes) {
             this.expenses = expenses;
+            this.incomes = incomes;
             this.duplicateExpenses = duplicateExpenses;
-            /*this.duplicateIncomes = duplicateIncomes;*/
+            this.duplicateIncomes = duplicateIncomes;
         }
 
         public boolean hasDuplicates() {
-            return duplicateExpenses > 0 /*|| duplicateIncomes > 0*/;
+            return duplicateExpenses > 0 || duplicateIncomes > 0;
         }
     }
 
     /** Rezultatul final al importului (după commit) + sumar pentru UI. */
     public static class ExcelImportResult {
         public int expensesInserted;
-//        public int incomesInserted;
+        public int incomesInserted;
         public int expensesUpdated;
-//        public int incomesUpdated;
+        public int incomesUpdated;
         public int expensesSkipped;
-//        public int incomesSkipped;
+        public int incomesSkipped;
         public Resolution resolution;
 
         @Override
@@ -73,7 +75,9 @@ public class ExportImportUtils {
             sb.append("Cheltuieli – inserate: ").append(expensesInserted)
                     .append(", actualizate: ").append(expensesUpdated)
                     .append(", omise: ").append(expensesSkipped).append("\n");
-
+            sb.append("Venituri   – inserate: ").append(incomesInserted)
+                    .append(", actualizate: ").append(incomesUpdated)
+                    .append(", omise: ").append(incomesSkipped);
             return sb.toString();
         }
     }
@@ -84,9 +88,9 @@ public class ExportImportUtils {
 
     public static void exportToExcel(Context ctx, AppDatabase db, Uri outUri) throws Exception {
         List<Expense> expenses = db.expenseDao().getAll();
-//        List<Income> incomes = db.incomeDao().getAll();
+        List<Income> incomes = db.incomeDao().getAll();
 
-        if (expenses.isEmpty() /*&& incomes.isEmpty()*/) {
+        if (expenses.isEmpty() && incomes.isEmpty()) {
             throw new Exception("Nu există date pentru export.");
         }
 
@@ -121,13 +125,13 @@ public class ExportImportUtils {
             header2.createCell(3).setCellValue("Dată");
 
             int rowIdx2 = 1;
-//            for (Income i : incomes) {
-//                Row r = incomeSheet.createRow(rowIdx2++);
-//                r.createCell(0).setCellValue(i.sourceType != null ? i.sourceType : "");
-//                r.createCell(1).setCellValue(i.amount);
-//                r.createCell(2).setCellValue(i.description != null ? i.description : "");
-//                r.createCell(3).setCellValue(sdf.format(new Date(i.date)));
-//            }
+            for (Income i : incomes) {
+                Row r = incomeSheet.createRow(rowIdx2++);
+                r.createCell(0).setCellValue(i.categoryType != null ? i.categoryType : "");
+                r.createCell(1).setCellValue(i.amount);
+                r.createCell(2).setCellValue(i.description != null ? i.description : "");
+                r.createCell(3).setCellValue(sdf.format(new Date(i.date)));
+            }
 
             try (OutputStream os = ctx.getContentResolver().openOutputStream(outUri)) {
                 workbook.write(os);
@@ -167,10 +171,10 @@ public class ExportImportUtils {
                 normAmount(e.amount) + "|" + safe(e.description) + "|" + normDate(e.date);
     }
 
-//    private static String incomeKey(Income i) {
-//        return safe(i.sourceType) + "|" + normAmount(i.amount) + "|" +
-//                safe(i.description) + "|" + normDate(i.date);
-//    }
+    private static String incomeKey(Income i) {
+        return safe(i.categoryType) + "|" + normAmount(i.amount) + "|" +
+                safe(i.description) + "|" + normDate(i.date);
+    }
 
     /**
      * Citește Excel-ul și pregătește importul (fără să scrie în DB). Returnează
@@ -180,7 +184,7 @@ public class ExportImportUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
         List<Expense> importedExpenses = new ArrayList<>();
-//        List<Income> importedIncomes = new ArrayList<>();
+        List<Income> importedIncomes = new ArrayList<>();
 
         try (InputStream is = ctx.getContentResolver().openInputStream(inUri);
              XSSFWorkbook workbook = new XSSFWorkbook(is)) {
@@ -212,15 +216,15 @@ public class ExportImportUtils {
                     Row r = incomeSheet.getRow(i);
                     if (r == null) continue;
 
-//                    Income inc = new Income();
-//                    inc.sourceType = getStringCell(r.getCell(0));
-//                    inc.amount = getNumericCell(r.getCell(1));
-//                    inc.description = getStringCell(r.getCell(2));
-//                    String dateStr = getStringCell(r.getCell(3));
-//                    inc.date = dateStr.isEmpty() ? System.currentTimeMillis() : sdf.parse(dateStr).getTime();
-//                    inc.uid = UUID.randomUUID().toString();
-//
-//                    importedIncomes.add(inc);
+                    Income inc = new Income();
+                    inc.categoryType = getStringCell(r.getCell(0));
+                    inc.amount = getNumericCell(r.getCell(1));
+                    inc.description = getStringCell(r.getCell(2));
+                    String dateStr = getStringCell(r.getCell(3));
+                    inc.date = dateStr.isEmpty() ? System.currentTimeMillis() : sdf.parse(dateStr).getTime();
+                    inc.uid = UUID.randomUUID().toString();
+
+                    importedIncomes.add(inc);
                 }
             }
         }
@@ -232,9 +236,9 @@ public class ExportImportUtils {
         }
 
         Set<String> existingIncomeKeys = new HashSet<>();
-//        for (Income i : db.incomeDao().getAll()) {
-//            existingIncomeKeys.add(incomeKey(i));
-//        }
+        for (Income i : db.incomeDao().getAll()) {
+            existingIncomeKeys.add(incomeKey(i));
+        }
 
         int dupExpenses = 0;
         for (Expense e : importedExpenses) {
@@ -242,11 +246,11 @@ public class ExportImportUtils {
         }
 
         int dupIncomes = 0;
-//        for (Income i : importedIncomes) {
-//            if (existingIncomeKeys.contains(incomeKey(i))) dupIncomes++;
-//        }
+        for (Income i : importedIncomes) {
+            if (existingIncomeKeys.contains(incomeKey(i))) dupIncomes++;
+        }
 
-        return new PendingExcelImport(importedExpenses,/*importedIncomes,*/ dupExpenses/*, dupIncomes*/);
+        return new PendingExcelImport(importedExpenses, importedIncomes, dupExpenses, dupIncomes);
     }
 
     /**
@@ -268,10 +272,10 @@ public class ExportImportUtils {
         for (Expense e : db.expenseDao().getAll()) {
             expByKey.put(expenseKey(e), e);
         }
-//        Map<String, Income> incByKey = new HashMap<>();
-//        for (Income i : db.incomeDao().getAll()) {
-//            incByKey.put(incomeKey(i), i);
-//        }
+        Map<String, Income> incByKey = new HashMap<>();
+        for (Income i : db.incomeDao().getAll()) {
+            incByKey.put(incomeKey(i), i);
+        }
 
         // --- Cheltuieli ---
         for (Expense imp : pending.expenses) {
@@ -297,23 +301,23 @@ public class ExportImportUtils {
         }
 
         // --- Venituri ---
-//        for (Income imp : pending.incomes) {
-//            String k = incomeKey(imp);
-//            Income exist = incByKey.get(k);
-//            if (exist == null) {
-//                db.incomeDao().insert(imp);
-//                out.incomesInserted++;
-//            } else if (resolution == Resolution.REPLACE_DUPLICATES) {
-//                exist.amount = imp.amount;
-//                exist.description = imp.description;
-//                exist.sourceType = imp.sourceType;
-//                exist.date = imp.date;
-//                db.incomeDao().update(exist);
-//                out.incomesUpdated++;
-//            } else {
-//                out.incomesSkipped++;
-//            }
-//        }
+        for (Income imp : pending.incomes) {
+            String k = incomeKey(imp);
+            Income exist = incByKey.get(k);
+            if (exist == null) {
+                db.incomeDao().insert(imp);
+                out.incomesInserted++;
+            } else if (resolution == Resolution.REPLACE_DUPLICATES) {
+                exist.amount = imp.amount;
+                exist.description = imp.description;
+                exist.categoryType = imp.categoryType;
+                exist.date = imp.date;
+                db.incomeDao().update(exist);
+                out.incomesUpdated++;
+            } else {
+                out.incomesSkipped++;
+            }
+        }
 
         // notifică UI (dacă folosești acest flag în MainActivity)
         MainActivity.shouldRefreshTotals = true;
@@ -379,23 +383,23 @@ public class ExportImportUtils {
             expArray.put(o);
         }
         root.put("expenses", expArray);
-//
-//        List<Income> incomes = db.incomeDao().getAll();
-//        org.json.JSONArray incArray = new org.json.JSONArray();
-//        for (Income i : incomes) {
-//            org.json.JSONObject o = new org.json.JSONObject();
-//            o.put("uid", i.uid);
-//            o.put("amount", i.amount);
-//            o.put("description", i.description);
-//            o.put("date", i.date);
-//            o.put("sourceType", i.sourceType);
-//            incArray.put(o);
-//        }
-//        root.put("incomes", incArray);
-//
-//        try (OutputStreamWriter writer = new OutputStreamWriter(os, java.nio.charset.StandardCharsets.UTF_8)) {
-//            writer.write(root.toString(2));
-//            writer.flush();
-//        }
+
+        List<Income> incomes = db.incomeDao().getAll();
+        org.json.JSONArray incArray = new org.json.JSONArray();
+        for (Income i : incomes) {
+            org.json.JSONObject o = new org.json.JSONObject();
+            o.put("uid", i.uid);
+            o.put("amount", i.amount);
+            o.put("description", i.description);
+            o.put("date", i.date);
+            o.put("sourceType", i.categoryType);
+            incArray.put(o);
+        }
+        root.put("incomes", incArray);
+
+        try (OutputStreamWriter writer = new OutputStreamWriter(os, java.nio.charset.StandardCharsets.UTF_8)) {
+            writer.write(root.toString(2));
+            writer.flush();
+        }
     }
 }
