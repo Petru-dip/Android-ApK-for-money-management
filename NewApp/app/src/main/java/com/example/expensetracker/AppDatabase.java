@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Expense.class, Income.class}, version = 2)
+@Database(entities = {Expense.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase INSTANCE;
     public abstract ExpenseDao expenseDao();

@@ -1,0 +1,21 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.FinanceApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Culori principale -->
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/brand_surface</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        <!-- Fundal general -->
+        <item name="android:colorBackground">@color/brand_surface</item>
+        <item name="colorOnBackground">@color/brand_on_surface</item>
+
+        <!-- Activare suport dark -->
+        <item name="android:forceDarkAllowed">true</item>
+
+        <!-- Stil implicit pentru butoane -->
+        <item name="materialButtonStyle">@style/Widget.FinanceApp.Button</item>
+    </style>
+
+</resources>

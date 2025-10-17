@@ -1,0 +1,82 @@
+plugins {
+    id "com.android.application" version "8.5.2"
+    id "org.jetbrains.kotlin.android" version "1.9.24"
+    id "org.jetbrains.kotlin.kapt" version "1.9.24"
+}
+
+android {
+    namespace "com.example.expensetracker"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.example.expensetracker"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+            )
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    packaging {
+        resources {
+            excludes += [
+                    "META-INF/DEPENDENCIES",
+                    "META-INF/LICENSE",
+                    "META-INF/NOTICE",
+                    "META-INF/LICENSE.txt",
+                    "META-INF/NOTICE.txt"
+            ]
+        }
+    }
+}
+
+dependencies {
+    // Păstrează DOAR KTX (șterge dependency-ul simplu `androidx.core:core`)
+    implementation "androidx.core:core-ktx:1.13.0"
+
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "com.google.android.material:material:1.12.0"
+    implementation "androidx.recyclerview:recyclerview:1.3.2"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+
+    implementation "androidx.navigation:navigation-fragment:2.7.7"
+    implementation "androidx.navigation:navigation-ui:2.7.7"
+
+    implementation "androidx.work:work-runtime:2.9.0"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+
+    // Room + KAPT
+    implementation "androidx.room:room-runtime:2.6.1"
+    kapt "androidx.room:room-compiler:2.6.1"
+    implementation "androidx.room:room-ktx:2.6.1"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1"
+
+    implementation "org.apache.poi:poi:5.4.1"
+    implementation "org.apache.poi:poi-ooxml:5.4.1"
+    // dacă îți cere la sync:
+    // implementation "org.apache.xmlbeans:xmlbeans:5.2.1"
+
+    implementation "com.google.code.gson:gson:2.10.1"
+
+    // MPAndroidChart (necesită JitPack în settings.gradle)
+    implementation "com.github.PhilJay:MPAndroidChart:v3.1.0"
+}

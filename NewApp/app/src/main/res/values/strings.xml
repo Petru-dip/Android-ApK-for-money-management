@@ -1,0 +1,113 @@
+<resources>
+    <string name="app_name">FinanceApp</string>
+
+    <!-- Filtre / vizualizări -->
+    <string name="filter_all">Toate</string>
+    <string name="filter_personal">Personal</string>
+    <string name="filter_firma">Firmă</string>
+    <string name="view_transactions">Tranzacții</string>
+    <string name="view_by_day">Pe zile</string>
+    <string name="view_by_category">Pe categorii</string>
+
+    <!-- Titluri ecrane -->
+    <string name="title_expenses">Cheltuieli</string>
+    <string name="title_incomes">Venituri</string>
+    <string name="title_add_incomes">Adaugǎ Venituri</string>
+    <string name="title_add_expenses">Adaugǎ o Cheltuialǎ</string>
+
+    <!-- Meniu drawer / manifest -->
+    <string name="settings">Setări</string>
+    <string name="about">Despre</string>
+
+    <!-- Spinner tip -->
+    <string-array name="type_personal_firma">
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+    <string-array name="type_all_personal_firma">
+        <item>Toate</item>
+        <item>PERSONAL</item>
+        <item>FIRMA</item>
+    </string-array>
+
+
+    <!-- Spinner tip -->
+    <string-array name="type_sursa">
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+
+    </string-array>
+    <string-array name="type_all_sursa">
+        <item>Toate</item>
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+    </string-array>
+
+    <!-- Perioade comune -->
+    <string-array name="periods_common">
+        <item>Azi</item>
+        <item>Săptămâna curentă</item>
+        <item>Luna curentă</item>
+        <item>Ultimele 30 zile</item>
+    </string-array>
+
+    <!-- Categorii predefinite -->
+    <string-array name="expense_categories">
+        <item>Mâncare</item>
+        <item>Sănătate</item>
+        <item>Transport</item>
+        <item>Casă</item>
+        <item>Altele</item>
+    </string-array>
+    <string-array name="income_categories">
+        <item>Salariu</item>
+        <item>Bonus</item>
+        <item>Familie</item>
+        <item>Primit</item>
+        <item>Altele</item>
+    </string-array>
+    <string name="edit">Editează</string>
+    <string name="delete">Șterge</string>
+    <string name="cancel">Anulează</string>
+
+    <string name="confirm_delete_income">Sigur vrei să ștergi venitul?</string>
+
+    <string name="deleted">Șters</string>
+
+
+    <!-- Dacă ai și ecranul de cheltuieli, util să existe echivalentele: -->
+    <string name="confirm_delete_expense">Sigur vrei să ștergi această cheltuială?</string>
+    <string name="updated">Actualizat</string>
+    <string name="saved">Salvat</string>
+
+    <!-- Auto-Save -->
+    <string name="menu_auto_save_on">Auto-save: PORNIT</string>
+    <string name="menu_auto_save_off">Auto-save: OPRIT</string>
+    <string name="toast_auto_save_on">Auto-Save activat. Cheltuielile se salvează automat din notificări.</string>
+    <string name="toast_auto_save_off">Auto-Save dezactivat. Se va deschide aplicația pentru confirmare.</string>
+
+    <string name="no_incomes_yet">Nu există venituri încă.</string>
+
+
+        <!-- campuri generice -->
+        <string name="amount">Suma</string>
+        <string name="description">Descriere</string>
+        <string name="date">Data</string>
+        <string name="source_optional">Sursa (opțional)</string>
+
+        <!-- butoane si mesaje uzuale -->
+        <string name="save">Salvează</string>
+
+    <!-- mesaje / titluri -->
+    <string name="invalid_amount">Sumă invalidă</string>
+
+
+
+
+</resources>

@@ -1,0 +1,84 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="BrimTech Finance"
+            app:titleCentered="true"
+            app:titleTextColor="@android:color/white" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/expense_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:hint="@string/amount" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/expense_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/description"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/expense_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:clickable="true"
+                android:hint="@string/date" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <Spinner
+            android:id="@+id/expense_category"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:entries="@array/type_sursa"
+            android:layout_marginTop="20dp" />
+
+        <Spinner
+            android:id="@+id/expense_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:entries="@array/type_personal_firma"
+            android:layout_marginTop="20dp" />
+        <Button
+            android:id="@+id/btn_save_expense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Salvează modificările"
+            android:layout_marginTop="60dp" />
+        <Button
+            android:id="@+id/btn_delete_expense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Șterge"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+</ScrollView>
