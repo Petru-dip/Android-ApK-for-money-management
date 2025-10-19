@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+
+import android.graphics.Typeface;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 /** Ecran raport: pie + bar, pe perioadă selectabilă. */
 public class ReportActivity extends BaseActivity {
 
@@ -37,15 +44,15 @@ public class ReportActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_report);
+        setContentView(R.layout.graph_report);
 
         type = getIntent().getStringExtra(EXTRA_TYPE);
         boolean isIncome = "income".equalsIgnoreCase(type);
-//        setupToolbar(isIncome ? R.string.title_incomes : R.string.title_expenses, true);
+        setupToolbar(isIncome ? R.string.title_incomes : R.string.title_expenses, true);
 
-//        pieChart = findViewById(R.id.pieChart);
-//        barChart = findViewById(R.id.barChart);
-//        periodDropdown = findViewById(R.id.dropdown_period);
+        pieChart = findViewById(R.id.pieChart);
+        barChart = findViewById(R.id.barChart);
+        periodDropdown = findViewById(R.id.dropdown_period);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.periods_common, android.R.layout.simple_list_item_1);
@@ -79,12 +86,12 @@ public class ReportActivity extends BaseActivity {
 
             Map<String, Double> sums = new HashMap<>();
             if ("income".equalsIgnoreCase(type)) {
-//                List<Income> data = AppDatabase.getInstance(getApplicationContext()).incomeDao().getAll();
-//                for (Income i : data) {
-//                    if (i.date < from) continue;
-//                    String key = i.sourceType == null || i.sourceType.isEmpty() ? "Altele" : i.sourceType;
-//                    sums.put(key, sums.getOrDefault(key, 0.0) + i.amount);
-//                }
+                List<Income> data = AppDatabase.getInstance(getApplicationContext()).incomeDao().getAll();
+                for (Income i : data) {
+                    if (i.date < from) continue;
+                    String key = i.categoryType == null || i.categoryType.isEmpty() ? "Altele" : i.categoryType;
+                    sums.put(key, sums.getOrDefault(key, 0.0) + i.amount);
+                }
             } else {
                 List<Expense> data = AppDatabase.getInstance(getApplicationContext()).expenseDao().getAll();
                 for (Expense e : data) {
@@ -105,6 +112,7 @@ public class ReportActivity extends BaseActivity {
             barChart.clear();
             return;
         }
+        renderLegend(sums);
 
         List<PieEntry> pie = new ArrayList<>();
         List<BarEntry> bars = new ArrayList<>();
@@ -169,6 +177,51 @@ public class ReportActivity extends BaseActivity {
             return now - 30L * 24 * 60 * 60 * 1000;
         }
     }
+
+    private void renderLegend(Map<String, Double> sums) {
+        LinearLayout legendContainer = findViewById(R.id.legendContainer);
+        legendContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        for (Map.Entry<String, Double> e : sums.entrySet()) {
+            String category = e.getKey();
+            double value = e.getValue();
+            int color = CategoryMeta.pickColor(this, category);
+
+            // Creează un rând (orizontal)
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(8, 8, 8, 8);
+            row.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            // Punct colorat
+            View dot = new View(this);
+            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(24, 24);
+            dotParams.setMargins(0, 0, 16, 0);
+            dot.setLayoutParams(dotParams);
+            dot.setBackgroundResource(R.drawable.legend_dot);
+            dot.getBackground().setTint(color);
+
+            // Nume categorie
+            TextView tvCategory = new TextView(this);
+            tvCategory.setText(category);
+            tvCategory.setTextSize(15);
+            tvCategory.setLayoutParams(new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+            // Valoare
+            TextView tvValue = new TextView(this);
+            tvValue.setText(String.format(Locale.getDefault(), "RON %.0f", value));
+            tvValue.setTextSize(15);
+            tvValue.setTypeface(null, Typeface.BOLD);
+
+            row.addView(dot);
+            row.addView(tvCategory);
+            row.addView(tvValue);
+            legendContainer.addView(row);
+        }
+    }
+
 }
-
-

@@ -91,27 +91,27 @@ public class IncomeListActivity extends BaseActivity {
 
     private void initFilters() {
         View chipAll = findViewById(R.id.chip_income_all);
-        View chipFood = findViewById(R.id.chip_income_food);
-        View chipHealth = findViewById(R.id.chip_income_health);
-        View chipTransport = findViewById(R.id.chip_income_transport);
-        View chipHome = findViewById(R.id.chip_income_home);
+//        View chipFood = findViewById(R.id.chip_income_food);
+//        View chipHealth = findViewById(R.id.chip_income_health);
+//        View chipTransport = findViewById(R.id.chip_income_transport);
+//        View chipHome = findViewById(R.id.chip_income_home);
 
         View.OnClickListener l = v -> applyFilter(v.getId());
         chipAll.setOnClickListener(l);
-        chipFood.setOnClickListener(l);
-        chipHealth.setOnClickListener(l);
-        chipTransport.setOnClickListener(l);
-        chipHome.setOnClickListener(l);
+//        chipFood.setOnClickListener(l);
+//        chipHealth.setOnClickListener(l);
+//        chipTransport.setOnClickListener(l);
+//        chipHome.setOnClickListener(l);
     }
 
     private void applyFilter(int id) {
         if (fullData == null) return;
         java.util.ArrayList<Income> filtered = new java.util.ArrayList<>();
         String key = null;
-        if (id == R.id.chip_income_food) key = "mancare";
-        else if (id == R.id.chip_income_health) key = "sanatate";
-        else if (id == R.id.chip_income_transport) key = "transport";
-        else if (id == R.id.chip_income_home) key = "casa";
+//        if (id == R.id.chip_income_food) key = "mancare";
+//        else if (id == R.id.chip_income_health) key = "sanatate";
+//        else if (id == R.id.chip_income_transport) key = "transport";
+//        else if (id == R.id.chip_income_home) key = "casa";
 
         if (key == null) {
             adapter.submitList(fullData);

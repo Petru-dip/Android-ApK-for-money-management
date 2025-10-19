@@ -31,29 +31,35 @@
             android:text="Toate"
             android:checked="true"/>
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_income_food"
+            android:id="@+id/chip_income_salariu"
             style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mâncare"/>
+            android:text="Salariu"/>
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_income_health"
+            android:id="@+id/chip_income_Bonus"
             style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sănătate"/>
+            android:text="Bonus"/>
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_income_transport"
+            android:id="@+id/chip_income_familie"
             style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Transport"/>
+            android:text="Familie"/>
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_income_home"
+            android:id="@+id/chip_income_primit"
             style="@style/Widget.Material3.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Casă"/>
+            android:text="Primit"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_income_altele"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Alte Venituri"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_income_report"

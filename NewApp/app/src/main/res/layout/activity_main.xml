@@ -143,12 +143,13 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+
                 <!-- 🔹 Card: Totaluri -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_totals"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginBottom="96dp"
                     app:cardCornerRadius="22dp"
                     app:cardElevation="6dp"
@@ -231,6 +232,7 @@
                                 android:textAllCaps="false"
                                 app:cornerRadius="20dp" />
 
+
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btn_total_personal"
                                 style="?attr/materialButtonStyle"
@@ -241,9 +243,25 @@
                                 android:text="Privat"
                                 android:textAllCaps="false"
                                 app:cornerRadius="20dp" />
+
                         </LinearLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="32dp"
+                            android:hint="@string/choose_period"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+                            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                android:id="@+id/dropdown_period_main"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="none" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

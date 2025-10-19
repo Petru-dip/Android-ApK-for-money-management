@@ -14,6 +14,7 @@
     <string name="title_incomes">Venituri</string>
     <string name="title_add_incomes">Adaugǎ Venituri</string>
     <string name="title_add_expenses">Adaugǎ o Cheltuialǎ</string>
+    <string name="title_reports">Rapoarte</string>
 
     <!-- Meniu drawer / manifest -->
     <string name="settings">Setări</string>
@@ -24,6 +25,7 @@
         <item>PERSONAL</item>
         <item>FIRMA</item>
     </string-array>
+
     <string-array name="type_all_personal_firma">
         <item>Toate</item>
         <item>PERSONAL</item>
@@ -38,8 +40,8 @@
         <item>Transport</item>
         <item>Casă</item>
         <item>Altele</item>
-
     </string-array>
+
     <string-array name="type_all_sursa">
         <item>Toate</item>
         <item>Mâncare</item>
@@ -57,6 +59,14 @@
         <item>Ultimele 30 zile</item>
     </string-array>
 
+    <string-array name="periods_main">
+        <item>Azi</item>
+        <item>Anul curent</item>
+        <item>De la început</item>
+        <item>Perioadă custom</item>
+        <item>Luna Curenta</item>
+    </string-array>
+
     <!-- Categorii predefinite -->
     <string-array name="expense_categories">
         <item>Mâncare</item>
@@ -65,6 +75,7 @@
         <item>Casă</item>
         <item>Altele</item>
     </string-array>
+
     <string-array name="income_categories">
         <item>Salariu</item>
         <item>Bonus</item>
@@ -72,6 +83,7 @@
         <item>Primit</item>
         <item>Altele</item>
     </string-array>
+
     <string name="edit">Editează</string>
     <string name="delete">Șterge</string>
     <string name="cancel">Anulează</string>
@@ -106,8 +118,8 @@
 
     <!-- mesaje / titluri -->
     <string name="invalid_amount">Sumă invalidă</string>
-
-
-
+    <string name="choose_period">Alege perioada</string>
+    <string name="choose_category">Alege categoria</string>
+    <string name="totals_template">Venit total: %.2f | Cheltuieli totale: %.2f | Sold: %.2f</string>
 
 </resources>

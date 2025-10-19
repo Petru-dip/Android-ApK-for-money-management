@@ -41,13 +41,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 ////    }
 ////
 //
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // butonul back din bară (stânga)
-//        if (item.getItemId() == android.R.id.home) {
-//            getOnBackPressedDispatcher().onBackPressed();
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // butonul back din bară (stânga)
+        if (item.getItemId() == android.R.id.home) {
+            getOnBackPressedDispatcher().onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

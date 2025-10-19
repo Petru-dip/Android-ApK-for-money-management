@@ -29,18 +29,18 @@ public interface ExpenseDao {
     @Delete
     void delete(Expense e);
 
-    // folosite în MainActivity
     @Query("SELECT SUM(amount) FROM expense")
     Double getTotalAmount();
+
+    @Query("SELECT SUM(amount) FROM expense WHERE date BETWEEN :from AND :to")
+    Double getTotalAmountByDate(long from, long to);
 
     @Query("SELECT SUM(amount) FROM expense WHERE categoryType = :type")
     Double getTotalByCategoryType(String type);
 
-    // folosite de ExpenseReportActivity (logurile tale arătau apeluri aici)
     @Query("SELECT SUM(amount) FROM expense WHERE categoryType = :type AND date BETWEEN :from AND :to")
     Double getTotalByTypeAndDate(String type, long from, long to);
 
-    // folosit de UidBackfill (ai avut eroare anterior)
     @Query("SELECT * FROM expense WHERE uid IS NULL OR uid = ''")
     List<Expense> getMissingUid();
 }

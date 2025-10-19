@@ -1,5 +1,6 @@
 package com.example.expensetracker;
 
+import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -11,10 +12,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AlphaAnimation;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,9 +30,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
+import androidx.core.util.Pair;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends BaseActivity {
@@ -40,6 +45,8 @@ public class MainActivity extends BaseActivity {
     public static boolean shouldRefreshTotals = false;
 
     private TextView tvIncome, tvExpense, tvBalance;
+    private AutoCompleteTextView dropdownPeriod;
+    private long customDateStart = -1, customDateEnd = -1;
 
     private enum FilterType {ALL, FIRMA, PERSONAL}
     private FilterType currentFilter = FilterType.ALL;
@@ -157,24 +164,17 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         ThemeUtils.applySavedTheme(this);
         super.onCreate(savedInstanceState);
-
-        // Un singur setContentView
         setContentView(R.layout.activity_main);
 
-//        setupToolbar(R.string.app_name, false); // fără buton back pe ecranul principal
-
-        // Forward către AddExpenseActivity dacă am venit din notificare/ADB (fluxul manual)
         handleExpensePrefillIntent(getIntent());
 
         createExportChannel();
 
-        // Drawer + Toolbar
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.navigation_view);
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // DrawerToggle: gestionează iconița hamburger și deschiderea/închiderea
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,
                 R.string.app_name, R.string.app_name
@@ -186,7 +186,6 @@ public class MainActivity extends BaseActivity {
             navigationView.setNavigationItemSelectedListener(this::onDrawerItemClick);
         }
 
-        // Butoane principale
         MaterialButton btnExpense = findViewById(R.id.btn_add_expense);
         MaterialButton btnIncome = findViewById(R.id.btn_add_income);
         if (btnExpense != null) {
@@ -202,12 +201,10 @@ public class MainActivity extends BaseActivity {
             });
         }
 
-        // TextView-uri totaluri
         tvIncome = findViewById(R.id.tv_total_income);
         tvExpense = findViewById(R.id.tv_total_expense);
         tvBalance = findViewById(R.id.tv_balance);
 
-        // Butoane filtrare
         btnAll = findViewById(R.id.btn_total_all);
         btnFirma = findViewById(R.id.btn_total_firma);
         btnPersonal = findViewById(R.id.btn_total_personal);
@@ -216,9 +213,41 @@ public class MainActivity extends BaseActivity {
         if (btnFirma != null) btnFirma.setOnClickListener(v -> { currentFilter = FilterType.FIRMA;   highlightButton(btnFirma);   updateTotals(); });
         if (btnPersonal != null) btnPersonal.setOnClickListener(v -> { currentFilter = FilterType.PERSONAL; highlightButton(btnPersonal); updateTotals(); });
 
+        setupPeriodFilter();
+
         highlightButton(btnAll);
         updateTotals();
         AutoBackup.scheduleDaily(this);
+    }
+
+    private void setupPeriodFilter() {
+        dropdownPeriod = findViewById(R.id.dropdown_period_main);
+        String[] periods = getResources().getStringArray(R.array.periods_main);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, periods);
+        dropdownPeriod.setAdapter(adapter);
+        dropdownPeriod.setText(periods[4], false); // "De la început" by default
+
+        dropdownPeriod.setOnItemClickListener((parent, view, position, id) -> {
+            if (periods[position].equals("Perioadă custom")) {
+                showDateRangePicker();
+            } else {
+                customDateStart =-1;
+                customDateEnd = -1;
+                updateTotals();
+            }
+        });
+    }
+
+    private void showDateRangePicker() {
+        MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
+        builder.setTitleText("Selectează un interval de date");
+        MaterialDatePicker<Pair<Long, Long>> picker = builder.build();
+        picker.addOnPositiveButtonClickListener(selection -> {
+            customDateStart = selection.first;
+            customDateEnd = selection.second;
+            updateTotals();
+        });
+        picker.show(getSupportFragmentManager(), picker.toString());
     }
 
     @Override
@@ -228,7 +257,6 @@ public class MainActivity extends BaseActivity {
         handleExpensePrefillIntent(intent);
     }
 
-    /** Dacă aplicația a fost deschisă cu ACTION_EXPENSE_FROM_NOTIFICATION, deschidem AddExpense cu extras-urile primite. */
     private void handleExpensePrefillIntent(Intent intent) {
         if (intent == null) return;
         if (!PaymentNotificationService.ACTION_EXPENSE_FROM_NOTIFICATION.equals(intent.getAction()))
@@ -237,7 +265,7 @@ public class MainActivity extends BaseActivity {
         Intent add = new Intent(this, AddExpenseActivity.class);
         add.setAction(intent.getAction());
         if (intent.getExtras() != null) {
-            add.putExtras(intent.getExtras()); // păstrăm toate cheile
+            add.putExtras(intent.getExtras());
         }
         startActivity(add);
     }
@@ -285,26 +313,28 @@ public class MainActivity extends BaseActivity {
     private void updateTotals() {
         new Thread(() -> {
             AppDatabase db = AppDatabase.getInstance(this);
+            long[] dateRange = getDateRange(dropdownPeriod.getText().toString());
+
             double totalIncome = 0.0;
             double totalExpense = 0.0;
 
             switch (currentFilter) {
                 case ALL -> {
-                    Double inc = db.incomeDao().getTotalAmount();
-                    Double exp = db.expenseDao().getTotalAmount();
-//                    totalIncome  = (inc != null ? inc : 0.0);
+                    Double inc = db.incomeDao().getTotalAmountByDate(dateRange[0], dateRange[1]);
+                    Double exp = db.expenseDao().getTotalAmountByDate(dateRange[0], dateRange[1]);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case FIRMA -> {
-                    Double inc = db.incomeDao().getTotalBySourceType("FIRMA");
-                    Double exp = db.expenseDao().getTotalByCategoryType("FIRMA");
-//                    totalIncome  = (inc != null ? inc : 0.0);
+                    Double inc = db.incomeDao().getTotalByTypeAndDate("FIRMA", dateRange[0], dateRange[1]);
+                    Double exp = db.expenseDao().getTotalByTypeAndDate("FIRMA", dateRange[0], dateRange[1]);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
                 case PERSONAL -> {
-                    Double inc = db.incomeDao().getTotalBySourceType("PERSONAL");
-                    Double exp = db.expenseDao().getTotalByCategoryType("PERSONAL");
-//                    totalIncome  = (inc != null ? inc : 0.0);
+                    Double inc = db.incomeDao().getTotalByTypeAndDate("PERSONAL", dateRange[0], dateRange[1]);
+                    Double exp = db.expenseDao().getTotalByTypeAndDate("PERSONAL", dateRange[0], dateRange[1]);
+                    totalIncome  = (inc != null ? inc : 0.0);
                     totalExpense = (exp != null ? exp : 0.0);
                 }
             }
@@ -326,6 +356,36 @@ public class MainActivity extends BaseActivity {
                         "Balanță: %.2f lei", balance));
             });
         }).start();
+    }
+
+    private long[] getDateRange(String period) {
+        if (period.equals("Perioadă custom") && customDateStart > 0 && customDateEnd > 0) {
+            return new long[]{customDateStart, customDateEnd};
+        }
+
+        Calendar to = Calendar.getInstance();
+        Calendar from = Calendar.getInstance();
+
+        switch (period) {
+            case "Azi":
+                from.set(Calendar.HOUR_OF_DAY, 0); from.set(Calendar.MINUTE, 0); from.set(Calendar.SECOND, 0);
+                break;
+            case "Anul curent":
+                from.set(Calendar.DAY_OF_YEAR, 1);
+                from.set(Calendar.HOUR_OF_DAY, 0); from.set(Calendar.MINUTE, 0); from.set(Calendar.SECOND, 0);
+                break;
+            case "Luna Curenta":
+                from.set(Calendar.MONTH, 2);
+                from.set(Calendar.HOUR_OF_DAY, 0); from.set(Calendar.MINUTE, 0); from.set(Calendar.SECOND, 0);
+                break;
+            case "De la început":
+            default:
+                return new long[]{0, Long.MAX_VALUE};
+        }
+
+        to.set(Calendar.HOUR_OF_DAY, 23); to.set(Calendar.MINUTE, 59); to.set(Calendar.SECOND, 59);
+
+        return new long[]{from.getTimeInMillis(), to.getTimeInMillis()};
     }
 
     private void animateText(TextView view, String newText) {
@@ -359,7 +419,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    // ---------------- NOTIFICĂRI ----------------
     private void createExportChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel ch = new NotificationChannel(
@@ -409,7 +468,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    // ------- MENIU: Auto-Save Toggle -------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
