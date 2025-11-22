@@ -32,6 +32,8 @@ class PaymentNotificationService : NotificationListenerService() {
         val combinedLower = combined.lowercase(Locale.ROOT)
 
         if (isPromotionalNoise(combinedLower)) return
+        if (isRequestOnly(combinedLower)) return
+        if (isNonPaymentInfo(combinedLower)) return
 
         var amount = extractAmount(title, text)
         var currency = extractCurrency(title, text)
@@ -41,8 +43,10 @@ class PaymentNotificationService : NotificationListenerService() {
         // semn venit/cheltuială
         val isIncome = isIncomeNotification(combinedLower, amount)
 
-        // fallback-uri cerute
-        if (Double.isNaN(amount) || amount <= 0) amount = 1.01 // „01.01” ca sumă fallback
+        // Dacă nu avem sumă validă, nu salvăm nimic (evităm fallback 1.01)
+        if (Double.isNaN(amount) || amount <= 0) {
+            return
+        }
 
         if (currency == null || currency.isEmpty()) currency = "RON"
         if (merchant == null) merchant = ""
@@ -102,18 +106,41 @@ class PaymentNotificationService : NotificationListenerService() {
 
     // ---------- Helperi de parsare -----------
     private fun extractAmount(vararg texts: String?): kotlin.Double {
-        val p = Pattern.compile("(-?\\d+[\\.,]\\d{1,2}|-?\\d+)")
+        val numberRegex = Regex("(-?\\d+[\\.,]\\d{1,2}|-?\\d+)")
+        val currencyRegex = Regex("(RON|LEI|EUR|USD|€|\\$)", RegexOption.IGNORE_CASE)
+        // încearcă să găsești un număr lipit de monedă
         for (t in texts) {
             if (t == null) continue
-            val m = p.matcher(t.replace("\u00A0", " "))
-            if (m.find()) {
-                try {
-                    return m.group(1).replace(',', '.').toDouble()
-                } catch (ignored: Exception) {
+            val cleaned = t.replace("\u00A0", " ")
+            val parts = cleaned.split(" ")
+            for (i in parts.indices) {
+                val part = parts[i]
+                if (currencyRegex.containsMatchIn(part)) {
+                    // caută număr în stânga sau dreapta
+                    if (i > 0 && numberRegex.containsMatchIn(parts[i - 1])) {
+                        return parts[i - 1].replace(",", ".").filter { it.isDigit() || it == '.' || it == '-' }.toDoubleOrNull()
+                            ?: kotlin.Double.NaN
+                    }
+                    if (i + 1 < parts.size && numberRegex.containsMatchIn(parts[i + 1])) {
+                        return parts[i + 1].replace(",", ".").filter { it.isDigit() || it == '.' || it == '-' }.toDoubleOrNull()
+                            ?: kotlin.Double.NaN
+                    }
                 }
             }
         }
-        return kotlin.Double.Companion.NaN
+        // fallback: primul număr găsit
+        for (t in texts) {
+            if (t == null) continue
+            val m = numberRegex.find(t.replace("\u00A0", " "))
+            if (m != null) {
+                return try {
+                    m.groupValues[1].replace(',', '.').toDouble()
+                } catch (ignored: Exception) {
+                    kotlin.Double.NaN
+                }
+            }
+        }
+        return kotlin.Double.NaN
     }
 
     private fun extractCurrency(vararg texts: String?): String? {
@@ -168,13 +195,18 @@ class PaymentNotificationService : NotificationListenerService() {
     }
 
     private fun isIncomeNotification(text: String, amount: kotlin.Double): Boolean {
-        val incomeRegex = Regex("(?i)\\b(received|primit|salary|salariu|bonus|refund|ramburs|incasare|încasare|creditat)\\b")
-        val expenseRegex = Regex("(?i)\\b(plata|payment|achitat|debitat|purchase|retragere|withdraw|cheltuială|cheltuiala)\\b")
+        val incomeRegex = Regex("(?i)\\b(received|primit|salary|salariu|bonus|refund|ramburs|incasare|încasare|creditat|sent you|ti-a trimis|tiau trimis|ti-a transferat|transferat|incoming|depunere|deposit)\\b")
+        val expenseRegex = Regex("(?i)\\b(plata|payment|achitat|debitat|purchase|retragere|withdraw|cheltuială|cheltuiala|card|visa|mastercard|mc|kaufland|lidl|carrefour|mega|bolt|uber)\\b")
         if (incomeRegex.containsMatchIn(text)) return true
         if (expenseRegex.containsMatchIn(text)) return false
+        // dacă avem o categorie ghicită de supermarket, tratăm ca expense
+        if (guessCategoryFromText(text) != null) return false
+        if (guessCategoryFromMerchant(text) != null) return false
+        // fallback: dacă există semn plus/minus în text
         if (text.contains("-")) return false
         if (text.contains("+")) return true
-        return amount > 0
+        // default conservator: cheltuială
+        return false
     }
 
     private fun isPromotionalNoise(text: String): Boolean {
@@ -183,6 +215,21 @@ class PaymentNotificationService : NotificationListenerService() {
                 (text.contains("prieten") || text.contains("friend"))
         val hasPromo = promoWords.count { text.contains(it) } >= 2
         return hasInviteFlow || hasPromo
+    }
+
+    private fun isRequestOnly(text: String): Boolean {
+        val req = Regex("(?i)\\b(request|requested|cerere|cerut|solicitat|has requested|asks for|asking for)\\b")
+        return req.containsMatchIn(text)
+    }
+
+    private fun isNonPaymentInfo(text: String): Boolean {
+        val keywords = listOf(
+            "revpoints", "points", "puncte", "reward", "recompens",
+            "welcome", "bine ai venit",
+            "declined", "decline", "respins", "refuzat",
+            "failed", "anulat", "cancelled"
+        )
+        return keywords.any { text.contains(it) }
     }
 
     private fun showSavedNotification(title: String?, text: String?) {

@@ -24,8 +24,10 @@ public class ExpenseListActivity extends BaseActivity {
     private SortMode sortMode = SortMode.DATE_DESC;
     private long rangeFrom = 0L, rangeTo = Long.MAX_VALUE;
     private MaterialAutoCompleteTextView dropdownPeriod;
+    private TypeFilter typeFilter = TypeFilter.ALL;
 
     private enum SortMode { DATE_DESC, CATEGORY, DATE_ASC }
+    private enum TypeFilter { ALL, PERSONAL, FIRMA }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,8 +104,11 @@ public class ExpenseListActivity extends BaseActivity {
     private void loadData() {
         updateRangeFromDropdown();
         new Thread(() -> {
+            String typeParam = null;
+            if (typeFilter == TypeFilter.PERSONAL) typeParam = "PERSONAL";
+            if (typeFilter == TypeFilter.FIRMA) typeParam = "FIRMA";
             List<Expense> data = AppDatabase.getInstance(getApplicationContext())
-                    .expenseDao().getByRangeAndCategory(rangeFrom, rangeTo, null, null);
+                    .expenseDao().getByRangeAndCategory(rangeFrom, rangeTo, null, typeParam);
             runOnUiThread(() -> {
                 fullData = data;
                 currentData = new java.util.ArrayList<>(data);
@@ -118,6 +123,9 @@ public class ExpenseListActivity extends BaseActivity {
         View chipHealth = findViewById(R.id.chip_expense_health);
         View chipTransport = findViewById(R.id.chip_expense_transport);
         View chipHome = findViewById(R.id.chip_expense_home);
+        View chipTypeAll = findViewById(R.id.chip_expense_type_all);
+        View chipTypePersonal = findViewById(R.id.chip_expense_type_personal);
+        View chipTypeFirma = findViewById(R.id.chip_expense_type_firma);
 
         View.OnClickListener l = v -> applyFilter(v.getId());
         chipAll.setOnClickListener(l);
@@ -125,6 +133,9 @@ public class ExpenseListActivity extends BaseActivity {
         chipHealth.setOnClickListener(l);
         chipTransport.setOnClickListener(l);
         chipHome.setOnClickListener(l);
+        chipTypeAll.setOnClickListener(v -> { typeFilter = TypeFilter.ALL; loadData(); });
+        chipTypePersonal.setOnClickListener(v -> { typeFilter = TypeFilter.PERSONAL; loadData(); });
+        chipTypeFirma.setOnClickListener(v -> { typeFilter = TypeFilter.FIRMA; loadData(); });
     }
 
     private void applyFilter(int id) {
