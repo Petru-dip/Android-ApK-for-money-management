@@ -11,7 +11,7 @@ import java.util.List;
 @Dao
 public interface ExpenseDao {
 
-    @Query("SELECT * FROM expense ORDER BY date DESC")
+    @Query("SELECT * FROM expense ORDER BY date DESC, id DESC")
     List<Expense> getAll();
 
     @Query("SELECT * FROM expense WHERE id = :id LIMIT 1")
@@ -43,4 +43,15 @@ public interface ExpenseDao {
 
     @Query("SELECT * FROM expense WHERE uid IS NULL OR uid = ''")
     List<Expense> getMissingUid();
+
+    @Query("SELECT * FROM expense WHERE date BETWEEN :from AND :to " +
+            "AND (:category IS NULL OR LENGTH(:category)=0 OR LOWER(category) LIKE '%' || LOWER(:category) || '%') " +
+            "AND (:categoryType IS NULL OR LENGTH(:categoryType)=0 OR categoryType = :categoryType) " +
+            "ORDER BY date DESC, id DESC")
+    List<Expense> getByRangeAndCategory(long from, long to, String category, String categoryType);
+
+    @Query("DELETE FROM expense WHERE date BETWEEN :from AND :to " +
+            "AND (:category IS NULL OR LENGTH(:category)=0 OR LOWER(category) LIKE '%' || LOWER(:category) || '%') " +
+            "AND (:categoryType IS NULL OR LENGTH(:categoryType)=0 OR categoryType = :categoryType)")
+    int deleteByRangeAndCategory(long from, long to, String category, String categoryType);
 }

@@ -13,6 +13,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_income_period"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="Perioadă"
+        app:layout_constraintTop_toBottomOf="@id/toolbar_include"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/dropdown_income_period"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:clickable="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chips_income"
         android:layout_width="0dp"
@@ -20,7 +40,7 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         app:singleSelection="true"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_include"
+        app:layout_constraintTop_toBottomOf="@id/til_income_period"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.chip.Chip
@@ -60,14 +80,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Alte Venituri"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <LinearLayout
+        android:id="@+id/income_actions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@id/chips_income"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_sort_income"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ordine: dată (recent)" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_income_report"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="228dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:text="Raport" />
-    </com.google.android.material.chip.ChipGroup>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/income_recycler"
@@ -80,7 +122,7 @@
         android:paddingBottom="8dp"
         app:layout_constrainedHeight="true"
         app:layout_constrainedWidth="true"
-        app:layout_constraintTop_toBottomOf="@id/chips_income"
+        app:layout_constraintTop_toBottomOf="@id/income_actions"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

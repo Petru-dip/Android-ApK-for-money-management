@@ -27,6 +27,11 @@
             android:title="Export Excel" />
 
         <item
+            android:id="@+id/nav_delete"
+            android:icon="@drawable/ic_delete"
+            android:title="Ștergere filtrată" />
+
+        <item
             android:id="@+id/nav_import"
             android:icon="@drawable/ic_import"
             android:title="Import Excel" />

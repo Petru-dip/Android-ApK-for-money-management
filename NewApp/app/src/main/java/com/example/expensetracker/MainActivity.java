@@ -15,11 +15,16 @@ import android.view.animation.AlphaAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -33,7 +38,9 @@ import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends BaseActivity {
@@ -52,6 +59,7 @@ public class MainActivity extends BaseActivity {
     private FilterType currentFilter = FilterType.ALL;
 
     private MaterialButton btnAll, btnFirma, btnPersonal;
+    private ExportImportUtils.ExportFilter pendingExportFilter;
 
     private final ActivityResultLauncher<String> exportExcelLauncher =
             registerForActivityResult(
@@ -61,7 +69,10 @@ public class MainActivity extends BaseActivity {
                         if (uri == null) return;
                         new Thread(() -> {
                             try {
-                                ExportImportUtils.exportToExcel(this, AppDatabase.getInstance(this), uri);
+                                ExportImportUtils.ExportFilter filter = pendingExportFilter != null
+                                        ? pendingExportFilter
+                                        : new ExportImportUtils.ExportFilter();
+                                ExportImportUtils.exportToExcel(this, AppDatabase.getInstance(this), uri, filter);
                                 notifyExport("Export Excel", "Fișier XLSX salvat cu succes.");
                                 shouldRefreshTotals = true;
                                 runOnUiThread(this::updateTotals);
@@ -231,7 +242,7 @@ public class MainActivity extends BaseActivity {
             if (periods[position].equals("Perioadă custom")) {
                 showDateRangePicker();
             } else {
-                customDateStart =-1;
+                customDateStart = -1;
                 customDateEnd = -1;
                 updateTotals();
             }
@@ -284,9 +295,10 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(this, ExpenseReportActivity.class));
             return true;
         } else if (id == R.id.nav_export) {
-            exportExcelLauncher.launch("finance-export-" +
-                    new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm", java.util.Locale.ROOT)
-                            .format(new java.util.Date()) + ".xlsx");
+            showDataFilterDialog(true);
+            return true;
+        } else if (id == R.id.nav_delete) {
+            showDataFilterDialog(false);
             return true;
         } else if (id == R.id.nav_import) {
             importExcelLauncher.launch(new String[]{
@@ -308,6 +320,113 @@ public class MainActivity extends BaseActivity {
             return true;
         }
         return false;
+    }
+
+    private void showDataFilterDialog(boolean isExport) {
+        android.view.View view = getLayoutInflater().inflate(R.layout.dialog_export_filter, null);
+        MaterialButton btnPickRange = view.findViewById(R.id.btn_pick_range);
+        TextView tvRange = view.findViewById(R.id.tv_selected_range);
+        MaterialAutoCompleteTextView dropdownData = view.findViewById(R.id.dropdown_data_type);
+        MaterialAutoCompleteTextView dropdownCategoryType = view.findViewById(R.id.dropdown_category_type);
+        TextInputEditText inputCategory = view.findViewById(R.id.input_category);
+        ChipGroup chips = view.findViewById(R.id.chips_categories);
+
+        ExportImportUtils.ExportFilter filter = new ExportImportUtils.ExportFilter();
+        tvRange.setText(formatRange(filter.from, filter.to));
+
+        String[] dataOptions = {"Cheltuieli + Venituri", "Numai Cheltuieli", "Numai Venituri"};
+        dropdownData.setSimpleItems(dataOptions);
+        dropdownData.setText(dataOptions[0], false);
+
+        String[] typeOptions = {"Toate tipurile", "PERSONAL", "FIRMA"};
+        dropdownCategoryType.setSimpleItems(typeOptions);
+        dropdownCategoryType.setText(typeOptions[0], false);
+
+        btnPickRange.setOnClickListener(v -> {
+            MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
+            builder.setTitleText("Alege perioada pentru " + (isExport ? "export" : "ștergere"));
+            MaterialDatePicker<Pair<Long, Long>> picker = builder.build();
+            picker.addOnPositiveButtonClickListener(sel -> {
+                filter.from = sel.first;
+                filter.to = sel.second;
+                tvRange.setText(formatRange(filter.from, filter.to));
+            });
+            picker.show(getSupportFragmentManager(), picker.toString());
+        });
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle(isExport ? "Export filtrat" : "Ștergere filtrată")
+                .setView(view)
+                .setPositiveButton(isExport ? "Exportă" : "Șterge", (d, w) -> {
+                    String category = inputCategory.getText() == null ? "" : inputCategory.getText().toString().trim();
+                    filter.categoryQuery = category.isEmpty() ? null : category;
+
+                    String scopeText = dropdownData.getText() == null ? "" : dropdownData.getText().toString();
+                    if (scopeText.contains("Numai Cheltuieli")) {
+                        filter.scope = ExportImportUtils.DataScope.EXPENSES_ONLY;
+                    } else if (scopeText.contains("Numai Venituri")) {
+                        filter.scope = ExportImportUtils.DataScope.INCOMES_ONLY;
+                    } else {
+                        filter.scope = ExportImportUtils.DataScope.BOTH;
+                    }
+
+                    String typeText = dropdownCategoryType.getText() == null ? "" : dropdownCategoryType.getText().toString();
+                    if (typeText.contains("PERSONAL")) filter.categoryType = "PERSONAL";
+                    else if (typeText.contains("FIRMA")) filter.categoryType = "FIRMA";
+                    else filter.categoryType = null;
+
+                    filter.categoryTerms = new java.util.ArrayList<>();
+                    if (chips != null) {
+                        for (int idChip : chips.getCheckedChipIds()) {
+                            Chip c = chips.findViewById(idChip);
+                            if (c != null && c.getText() != null) {
+                                filter.categoryTerms.add(c.getText().toString());
+                            }
+                        }
+                    }
+
+                    if (isExport) {
+                        pendingExportFilter = filter;
+                        exportExcelLauncher.launch("finance-export-" +
+                                new java.text.SimpleDateFormat("yyyy-MM-dd-HH-mm", java.util.Locale.ROOT)
+                                        .format(new java.util.Date()) + ".xlsx");
+                    } else {
+                        performDeleteWithFilter(filter);
+                    }
+                })
+                .setNegativeButton("Anulează", null)
+                .show();
+    }
+
+    private void performDeleteWithFilter(ExportImportUtils.ExportFilter filter) {
+        new Thread(() -> {
+            AppDatabase db = AppDatabase.getInstance(this);
+            String categoryType = filter.categoryType == null ? null : filter.categoryType.trim();
+            String category = filter.categoryQuery == null ? null : filter.categoryQuery.trim();
+
+            int deletedExp = 0;
+            int deletedInc = 0;
+
+            if (filter.scope != ExportImportUtils.DataScope.INCOMES_ONLY) {
+                deletedExp = db.expenseDao().deleteByRangeAndCategory(filter.from, filter.to, category, categoryType);
+            }
+            if (filter.scope != ExportImportUtils.DataScope.EXPENSES_ONLY) {
+                deletedInc = db.incomeDao().deleteByRangeAndCategory(filter.from, filter.to, category, categoryType);
+            }
+
+            int total = deletedExp + deletedInc;
+            runOnUiThread(() -> {
+                shouldRefreshTotals = true;
+                updateTotals();
+                Toast.makeText(this, "Șters " + total + " înregistrări", Toast.LENGTH_SHORT).show();
+            });
+        }).start();
+    }
+
+    private String formatRange(long from, long to) {
+        if (from <= 0 && to >= Long.MAX_VALUE) return "Tot istoricul";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        return sdf.format(new Date(from)) + " - " + sdf.format(new Date(to));
     }
 
     private void updateTotals() {

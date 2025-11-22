@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- ✅ Toolbar sus -->
+        <!-- Toolbar sus -->
         <include layout="@layout/include_toolbar"/>
 
 
@@ -31,7 +31,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- 🔹 Card: Cheltuială -->
+                <!-- Card: Cheltuială -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_add_expense"
                     android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- 🔹 Card: Venit -->
+                <!-- Card: Venit -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_add_income"
                     android:layout_width="match_parent"
@@ -144,7 +144,7 @@
                 </com.google.android.material.card.MaterialCardView>
 
 
-                <!-- 🔹 Card: Totaluri -->
+                <!-- Card: Totaluri -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_totals"
                     android:layout_width="match_parent"
@@ -266,7 +266,7 @@
         </ScrollView>
     </LinearLayout>
 
-<!--     ======= MENIU LATERAL ======= -->
+    <!--     ======= MENIU LATERAL ======= -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="wrap_content"

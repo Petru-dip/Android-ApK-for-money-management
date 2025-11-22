@@ -14,7 +14,7 @@ public interface IncomeDao {
     @Query("SELECT SUM(amount) FROM `Income` WHERE categoryType = :type")
     Double getTotalBySourceType(String type);
 
-    @Query("SELECT * FROM income ORDER BY date DESC")
+    @Query("SELECT * FROM income ORDER BY date DESC, id DESC")
     List<Income> getAll();
 
     @Query("SELECT * FROM income WHERE id = :id LIMIT 1")
@@ -47,4 +47,14 @@ public interface IncomeDao {
     @Query("SELECT * FROM income WHERE uid IS NULL OR uid = ''")
     List<Income> getMissingUid();
 
+    @Query("SELECT * FROM income WHERE date BETWEEN :from AND :to " +
+            "AND (:category IS NULL OR LENGTH(:category)=0 OR LOWER(category) LIKE '%' || LOWER(:category) || '%') " +
+            "AND (:categoryType IS NULL OR LENGTH(:categoryType)=0 OR categoryType = :categoryType) " +
+            "ORDER BY date DESC, id DESC")
+    List<Income> getByRangeAndCategory(long from, long to, String category, String categoryType);
+
+    @Query("DELETE FROM income WHERE date BETWEEN :from AND :to " +
+            "AND (:category IS NULL OR LENGTH(:category)=0 OR LOWER(category) LIKE '%' || LOWER(:category) || '%') " +
+            "AND (:categoryType IS NULL OR LENGTH(:categoryType)=0 OR categoryType = :categoryType)")
+    int deleteByRangeAndCategory(long from, long to, String category, String categoryType);
 }

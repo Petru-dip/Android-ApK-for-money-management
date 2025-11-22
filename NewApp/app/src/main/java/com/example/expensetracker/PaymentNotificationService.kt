@@ -28,6 +28,10 @@ class PaymentNotificationService : NotificationListenerService() {
         val textCs = e.getCharSequence(Notification.EXTRA_TEXT)
         val title = if (titleCs != null) titleCs.toString() else ""
         val text = if (textCs != null) textCs.toString() else ""
+        val combined = "$title $text"
+        val combinedLower = combined.lowercase(Locale.ROOT)
+
+        if (isPromotionalNoise(combinedLower)) return
 
         var amount = extractAmount(title, text)
         var currency = extractCurrency(title, text)
@@ -35,8 +39,7 @@ class PaymentNotificationService : NotificationListenerService() {
         var category = guessCategoryFromMerchant(merchant)
 
         // semn venit/cheltuială
-        val isIncome = Regex("(?i)\b(received|primit|salary|salariu|bonus|refund|ramburs)\b")
-            .containsMatchIn("$title $text")
+        val isIncome = isIncomeNotification(combinedLower, amount)
 
         // fallback-uri cerute
         if (Double.isNaN(amount) || amount <= 0) amount = 1.01 // „01.01” ca sumă fallback
@@ -48,21 +51,21 @@ class PaymentNotificationService : NotificationListenerService() {
         val autoOn = isAutoSaveOn(this)
 
         if (autoOn) {
-            // === AUTO: salvează în DB ca venit sau cheltuială ===
             if (isIncome) {
-//                val inc = Income()
-//                inc.amount = kotlin.math.abs(amount)
-//                inc.description = if (merchant.isEmpty()) "Auto" else merchant
-//                inc.date = System.currentTimeMillis()
-//                inc.categoryType = pickIncomeType("$title $text")
-//                inc.uid = UUID.randomUUID().toString()
-//                Thread {
-//                    AppDatabase.getInstance(applicationContext).incomeDao().insert(inc)
-//                    showSavedNotification(
-//                        "Venit salvat",
-//                        String.format(Locale.ROOT, "%.2f %s – %s", inc.amount, currency, inc.description)
-//                    )
-//                }.start()
+                val inc = Income()
+                inc.amount = kotlin.math.abs(amount)
+                inc.description = if (merchant.isEmpty()) "Auto" else merchant
+                inc.date = System.currentTimeMillis()
+                inc.category = category
+                inc.categoryType = pickIncomeType(combinedLower)
+                inc.uid = UUID.randomUUID().toString()
+                Thread {
+                    AppDatabase.getInstance(applicationContext).incomeDao().insert(inc)
+                    showSavedNotification(
+                        "Venit salvat",
+                        String.format(Locale.ROOT, "%.2f %s – %s", inc.amount, currency, inc.description)
+                    )
+                }.start()
 
             } else {
                 val ex = Expense()
@@ -81,10 +84,9 @@ class PaymentNotificationService : NotificationListenerService() {
                 }.start()
             }
         } else {
-            // === MANUAL: deschidem app cu prefill (MainActivity -> AddExpenseActivity) ===
-            // Lăsăm fluxul tău existent din MainActivity.handleExpensePrefillIntent
-            val i = Intent(this, MainActivity::class.java)
-            i.setAction(ACTION_EXPENSE_FROM_NOTIFICATION)
+            val target = if (isIncome) AddIncomeActivity::class.java else AddExpenseActivity::class.java
+            val i = Intent(this, target)
+            if (!isIncome) i.setAction(ACTION_EXPENSE_FROM_NOTIFICATION)
             i.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -147,10 +149,10 @@ class PaymentNotificationService : NotificationListenerService() {
 
     private fun guessCategoryFromText(text: String): String? {
         val t = text.lowercase()
-        if (Regex("(?i)\b(mâncare|mancare|supermarket|restaurant|pizza|mc|kfc|lidl|kaufland|carrefour)\b").containsMatchIn(t)) return "Mâncare"
-        if (Regex("(?i)\b(farmacie|spital|sanatate|sănătate)\b").containsMatchIn(t)) return "Sănătate"
-        if (Regex("(?i)\b(uber|bolt|transport|taxi|bilet)\b").containsMatchIn(t)) return "Transport"
-        if (Regex("(?i)\b(chirie|utilități|gaz|curent|apa|casă|casa)\b").containsMatchIn(t)) return "Casă"
+        if (Regex("(?i)\\b(mâncare|mancare|supermarket|restaurant|pizza|mc|kfc|lidl|kaufland|carrefour)\\b").containsMatchIn(t)) return "Mâncare"
+        if (Regex("(?i)\\b(farmacie|spital|sanatate|sănătate)\\b").containsMatchIn(t)) return "Sănătate"
+        if (Regex("(?i)\\b(uber|bolt|transport|taxi|bilet)\\b").containsMatchIn(t)) return "Transport"
+        if (Regex("(?i)\\b(chirie|utilități|gaz|curent|apa|casă|casa)\\b").containsMatchIn(t)) return "Casă"
         return null
     }
 
@@ -163,6 +165,24 @@ class PaymentNotificationService : NotificationListenerService() {
             t.contains("primit") || t.contains("received") || t.contains("transfer") -> "Primit"
             else -> "Altele"
         }
+    }
+
+    private fun isIncomeNotification(text: String, amount: kotlin.Double): Boolean {
+        val incomeRegex = Regex("(?i)\\b(received|primit|salary|salariu|bonus|refund|ramburs|incasare|încasare|creditat)\\b")
+        val expenseRegex = Regex("(?i)\\b(plata|payment|achitat|debitat|purchase|retragere|withdraw|cheltuială|cheltuiala)\\b")
+        if (incomeRegex.containsMatchIn(text)) return true
+        if (expenseRegex.containsMatchIn(text)) return false
+        if (text.contains("-")) return false
+        if (text.contains("+")) return true
+        return amount > 0
+    }
+
+    private fun isPromotionalNoise(text: String): Boolean {
+        val promoWords = listOf("invita", "invite", "prieten", "friend", "referral", "recomand", "promo", "campanie", "câștigi", "castigi", "win", "voucher")
+        val hasInviteFlow = (text.contains("invita") || text.contains("invite") || text.contains("refer")) &&
+                (text.contains("prieten") || text.contains("friend"))
+        val hasPromo = promoWords.count { text.contains(it) } >= 2
+        return hasInviteFlow || hasPromo
     }
 
     private fun showSavedNotification(title: String?, text: String?) {

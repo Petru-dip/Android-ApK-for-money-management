@@ -16,19 +16,34 @@ import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 public class ExportImportUtils {
 
     // =========================================================
     // ===============   Tipuri pentru import   ================
     // =========================================================
+
+    /** Filtre pentru export/ștergere în masă. */
+    public static class ExportFilter {
+        public DataScope scope = DataScope.BOTH;
+        public long from = 0L;
+        public long to = Long.MAX_VALUE;
+        /** Filtru „conține” pe categorie (pentru Expense.category / Income.category). */
+        public String categoryQuery;
+        /** PERSONAL / FIRMA, altfel null sau gol pentru toate. */
+        public String categoryType;
+        /** Liste de termeni pentru categorie (ex: mancare, transport, salariu). */
+        public java.util.List<String> categoryTerms = new java.util.ArrayList<>();
+    }
+
+    public enum DataScope { BOTH, EXPENSES_ONLY, INCOMES_ONLY }
 
     /** Rezolvarea aleasă de utilizator pentru import. */
     public enum Resolution {
@@ -87,8 +102,41 @@ public class ExportImportUtils {
     // =========================================================
 
     public static void exportToExcel(Context ctx, AppDatabase db, Uri outUri) throws Exception {
-        List<Expense> expenses = db.expenseDao().getAll();
-        List<Income> incomes = db.incomeDao().getAll();
+        exportToExcel(ctx, db, outUri, null);
+    }
+
+    public static void exportToExcel(Context ctx,
+                                     AppDatabase db,
+                                     Uri outUri,
+                                     ExportFilter filter) throws Exception {
+        List<Expense> expenses;
+        List<Income> incomes;
+
+        if (filter != null && filter.scope == DataScope.INCOMES_ONLY) {
+            expenses = new java.util.ArrayList<>();
+        } else if (filter != null) {
+            expenses = db.expenseDao().getByRangeAndCategory(
+                    filter.from, filter.to,
+                    filter.categoryQuery, filter.categoryType);
+        } else {
+            expenses = db.expenseDao().getAll();
+        }
+
+        if (filter != null && filter.scope == DataScope.EXPENSES_ONLY) {
+            incomes = new java.util.ArrayList<>();
+        } else if (filter != null) {
+            incomes = db.incomeDao().getByRangeAndCategory(
+                    filter.from, filter.to,
+                    filter.categoryQuery, filter.categoryType);
+        } else {
+            incomes = db.incomeDao().getAll();
+        }
+
+        // Aplica filtre suplimentare pe termeni de categorie (OR pe termeni, case-insensitive, fără diacritice)
+        if (filter != null && filter.categoryTerms != null && !filter.categoryTerms.isEmpty()) {
+            expenses = filterExpenses(expenses, filter);
+            incomes = filterIncomes(incomes, filter);
+        }
 
         if (expenses.isEmpty() && incomes.isEmpty()) {
             throw new Exception("Nu există date pentru export.");
@@ -119,18 +167,20 @@ public class ExportImportUtils {
             // === Sheet 2: Venituri ===
             Sheet incomeSheet = workbook.createSheet("Venituri");
             Row header2 = incomeSheet.createRow(0);
-            header2.createCell(0).setCellValue("Tip sursă");
-            header2.createCell(1).setCellValue("Sumă");
-            header2.createCell(2).setCellValue("Descriere");
-            header2.createCell(3).setCellValue("Dată");
+            header2.createCell(0).setCellValue("Categorie");
+            header2.createCell(1).setCellValue("Tip sursă");
+            header2.createCell(2).setCellValue("Sumă");
+            header2.createCell(3).setCellValue("Descriere");
+            header2.createCell(4).setCellValue("Dată");
 
             int rowIdx2 = 1;
             for (Income i : incomes) {
                 Row r = incomeSheet.createRow(rowIdx2++);
-                r.createCell(0).setCellValue(i.categoryType != null ? i.categoryType : "");
-                r.createCell(1).setCellValue(i.amount);
-                r.createCell(2).setCellValue(i.description != null ? i.description : "");
-                r.createCell(3).setCellValue(sdf.format(new Date(i.date)));
+                r.createCell(0).setCellValue(i.category != null ? i.category : "");
+                r.createCell(1).setCellValue(i.categoryType != null ? i.categoryType : "");
+                r.createCell(2).setCellValue(i.amount);
+                r.createCell(3).setCellValue(i.description != null ? i.description : "");
+                r.createCell(4).setCellValue(sdf.format(new Date(i.date)));
             }
 
             try (OutputStream os = ctx.getContentResolver().openOutputStream(outUri)) {
@@ -172,8 +222,82 @@ public class ExportImportUtils {
     }
 
     private static String incomeKey(Income i) {
-        return safe(i.categoryType) + "|" + normAmount(i.amount) + "|" +
-                safe(i.description) + "|" + normDate(i.date);
+        return safe(i.categoryType) + "|" + safe(i.category) + "|" +
+                normAmount(i.amount) + "|" + safe(i.description) + "|" + normDate(i.date);
+    }
+
+    private static List<Expense> filterExpenses(List<Expense> expenses, ExportFilter filter) {
+        if (expenses == null) return new java.util.ArrayList<>();
+        List<Expense> out = new java.util.ArrayList<>();
+        boolean hasCategory = filter.categoryQuery != null && !filter.categoryQuery.trim().isEmpty();
+        boolean hasType = filter.categoryType != null && !filter.categoryType.trim().isEmpty();
+        String categoryQuery = hasCategory ? normalize(filter.categoryQuery) : null;
+        java.util.List<String> terms = normalizeTerms(filter.categoryTerms);
+
+        for (Expense e : expenses) {
+            if (e == null) continue;
+            if (e.date < filter.from || e.date > filter.to) continue;
+            String catNorm = normalize(e.category);
+            if (hasCategory && !catNorm.contains(categoryQuery)) continue;
+            if (hasType) {
+                if (e.categoryType == null || !e.categoryType.equalsIgnoreCase(filter.categoryType)) continue;
+            }
+            if (!terms.isEmpty()) {
+                boolean match = false;
+                for (String t : terms) {
+                    if (catNorm.contains(t)) { match = true; break; }
+                }
+                if (!match) continue;
+            }
+            out.add(e);
+        }
+        return out;
+    }
+
+    private static List<Income> filterIncomes(List<Income> incomes, ExportFilter filter) {
+        if (incomes == null) return new java.util.ArrayList<>();
+        List<Income> out = new java.util.ArrayList<>();
+        boolean hasCategory = filter.categoryQuery != null && !filter.categoryQuery.trim().isEmpty();
+        boolean hasType = filter.categoryType != null && !filter.categoryType.trim().isEmpty();
+        String categoryQuery = hasCategory ? normalize(filter.categoryQuery) : null;
+        java.util.List<String> terms = normalizeTerms(filter.categoryTerms);
+
+        for (Income e : incomes) {
+            if (e == null) continue;
+            if (e.date < filter.from || e.date > filter.to) continue;
+            String catNorm = normalize(e.category);
+            if (hasCategory && !catNorm.contains(categoryQuery)) continue;
+            if (hasType) {
+                if (e.categoryType == null || !e.categoryType.equalsIgnoreCase(filter.categoryType)) continue;
+            }
+            if (!terms.isEmpty()) {
+                boolean match = false;
+                for (String t : terms) {
+                    if (catNorm.contains(t)) { match = true; break; }
+                }
+                if (!match) continue;
+            }
+            out.add(e);
+        }
+        return out;
+    }
+
+    private static String normalize(String input) {
+        if (input == null) return "";
+        String lower = input.toLowerCase(Locale.ROOT);
+        String normalized = java.text.Normalizer.normalize(lower, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    private static java.util.List<String> normalizeTerms(java.util.List<String> terms) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        if (terms == null) return out;
+        for (String t : terms) {
+            if (t == null) continue;
+            String n = normalize(t.trim());
+            if (!n.isEmpty()) out.add(n);
+        }
+        return out;
     }
 
     /**
@@ -217,10 +341,23 @@ public class ExportImportUtils {
                     if (r == null) continue;
 
                     Income inc = new Income();
-                    inc.categoryType = getStringCell(r.getCell(0));
-                    inc.amount = getNumericCell(r.getCell(1));
-                    inc.description = getStringCell(r.getCell(2));
-                    String dateStr = getStringCell(r.getCell(3));
+                    // suportă atât formatul vechi (Tip, Sumă, Desc, Dată) cât și noul format (Categorie, Tip, Sumă, Desc, Dată)
+                    int cells = r.getLastCellNum(); // poate fi -1
+                    boolean newFormat = cells >= 5;
+                    String dateStr;
+                    if (newFormat) {
+                        inc.category = getStringCell(r.getCell(0));
+                        inc.categoryType = getStringCell(r.getCell(1));
+                        inc.amount = getNumericCell(r.getCell(2));
+                        inc.description = getStringCell(r.getCell(3));
+                        dateStr = getStringCell(r.getCell(4));
+                    } else {
+                        inc.categoryType = getStringCell(r.getCell(0));
+                        inc.amount = getNumericCell(r.getCell(1));
+                        inc.description = getStringCell(r.getCell(2));
+                        dateStr = getStringCell(r.getCell(3));
+                        inc.category = ""; // necunoscut în formatul vechi
+                    }
                     inc.date = dateStr.isEmpty() ? System.currentTimeMillis() : sdf.parse(dateStr).getTime();
                     inc.uid = UUID.randomUUID().toString();
 
