@@ -22,9 +22,17 @@ public class ExpenseListActivity extends BaseActivity {
     private java.util.List<Expense> fullData;
     private java.util.List<Expense> currentData;
     private SortMode sortMode = SortMode.DATE_DESC;
+    private TypeFilter typeFilter = TypeFilter.ALL;
+    private View filtersContainer;
+    private boolean filtersVisible = true;
     private long rangeFrom = 0L, rangeTo = Long.MAX_VALUE;
     private MaterialAutoCompleteTextView dropdownPeriod;
-    private TypeFilter typeFilter = TypeFilter.ALL;
+    private static final String PREFS = "expense_filters";
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_CATEGORY = "category";
+    private static final String KEY_SORT = "sort";
+    private static final String KEY_PERIOD = "period";
+    private static final String KEY_FILTERS_VISIBLE = "filters_visible";
 
     private enum SortMode { DATE_DESC, CATEGORY, DATE_ASC }
     private enum TypeFilter { ALL, PERSONAL, FIRMA }
@@ -44,6 +52,16 @@ public class ExpenseListActivity extends BaseActivity {
         dropdownPeriod = findViewById(R.id.dropdown_expense_period);
         setupPeriodDropdown();
 
+        filtersContainer = findViewById(R.id.filters_container_expense);
+        MaterialButton toggleFilters = findViewById(R.id.btn_toggle_filters_expense);
+        if (toggleFilters != null && filtersContainer != null) {
+            toggleFilters.setOnClickListener(v -> {
+                filtersVisible = !filtersVisible;
+                applyFiltersVisibility(toggleFilters);
+                savePrefs();
+            });
+        }
+
         adapter.setListener(new ExpenseAdapter.Listener() {
             @Override public void onRowClick(Expense e) { openEdit(e); }
             @Override public void onEdit(Expense e) { openEdit(e); }
@@ -60,6 +78,7 @@ public class ExpenseListActivity extends BaseActivity {
             sortBtn.setOnClickListener(v -> {
                 cycleSort();
                 sortBtn.setText(getSortLabel());
+                savePrefs();
                 publishCurrentData();
             });
             sortBtn.setText(getSortLabel());
@@ -69,11 +88,6 @@ public class ExpenseListActivity extends BaseActivity {
             it.putExtra(ReportActivity.EXTRA_TYPE, "expense");
             startActivity(it);
         });
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        loadData();
     }
 
     private void openEdit(Expense e) {
@@ -133,9 +147,9 @@ public class ExpenseListActivity extends BaseActivity {
         chipHealth.setOnClickListener(l);
         chipTransport.setOnClickListener(l);
         chipHome.setOnClickListener(l);
-        chipTypeAll.setOnClickListener(v -> { typeFilter = TypeFilter.ALL; loadData(); });
-        chipTypePersonal.setOnClickListener(v -> { typeFilter = TypeFilter.PERSONAL; loadData(); });
-        chipTypeFirma.setOnClickListener(v -> { typeFilter = TypeFilter.FIRMA; loadData(); });
+        chipTypeAll.setOnClickListener(v -> { typeFilter = TypeFilter.ALL; savePrefs(); loadData(); });
+        chipTypePersonal.setOnClickListener(v -> { typeFilter = TypeFilter.PERSONAL; savePrefs(); loadData(); });
+        chipTypeFirma.setOnClickListener(v -> { typeFilter = TypeFilter.FIRMA; savePrefs(); loadData(); });
     }
 
     private void applyFilter(int id) {
@@ -157,6 +171,7 @@ public class ExpenseListActivity extends BaseActivity {
             if (c.contains(key)) filtered.add(e);
         }
         currentData = filtered;
+        savePrefs();
         publishCurrentData();
     }
 
@@ -226,6 +241,94 @@ public class ExpenseListActivity extends BaseActivity {
         return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
+    @Override protected void onResume() {
+        super.onResume();
+        restorePrefs();
+        loadData();
+    }
+
+    private String loadPref(String key, String def) {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        return sp.getString(key, def);
+    }
+
+    private boolean loadPrefBoolean(String key, boolean def) {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        return sp.getBoolean(key, def);
+    }
+
+    private void savePrefs() {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        sp.edit()
+                .putString(KEY_PERIOD, dropdownPeriod != null ? dropdownPeriod.getText().toString() : "Tot")
+                .putString(KEY_TYPE, typeFilter.name())
+                .putString(KEY_SORT, sortMode.name())
+                .putString(KEY_CATEGORY, currentCategoryKey())
+                .putBoolean(KEY_FILTERS_VISIBLE, filtersVisible)
+                .apply();
+    }
+
+    private void restorePrefs() {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        String period = sp.getString(KEY_PERIOD, "Tot");
+        if (dropdownPeriod != null && period != null) dropdownPeriod.setText(period, false);
+
+        String type = sp.getString(KEY_TYPE, TypeFilter.ALL.name());
+        typeFilter = TypeFilter.valueOf(type);
+        selectTypeChip(typeFilter);
+
+        String sort = sp.getString(KEY_SORT, SortMode.DATE_DESC.name());
+        sortMode = SortMode.valueOf(sort);
+        MaterialButton sortBtn = findViewById(R.id.btn_sort_expense);
+        if (sortBtn != null) sortBtn.setText(getSortLabel());
+
+        String categoryKey = sp.getString(KEY_CATEGORY, "all");
+        selectCategoryChip(categoryKey);
+        updateRangeFromDropdown();
+        filtersVisible = loadPrefBoolean(KEY_FILTERS_VISIBLE, true);
+        MaterialButton toggle = findViewById(R.id.btn_toggle_filters_expense);
+        applyFiltersVisibility(toggle);
+    }
+
+    private String currentCategoryKey() {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_expense);
+        if (g == null) return "all";
+        int id = g.getCheckedChipId();
+        if (id == R.id.chip_expense_food) return "mancare";
+        if (id == R.id.chip_expense_health) return "sanatate";
+        if (id == R.id.chip_expense_transport) return "transport";
+        if (id == R.id.chip_expense_home) return "casa";
+        return "all";
+    }
+
+    private void selectTypeChip(TypeFilter tf) {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_expense_type);
+        if (g == null) return;
+        switch (tf) {
+            case PERSONAL -> g.check(R.id.chip_expense_type_personal);
+            case FIRMA -> g.check(R.id.chip_expense_type_firma);
+            default -> g.check(R.id.chip_expense_type_all);
+        }
+    }
+
+    private void selectCategoryChip(String key) {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_expense);
+        if (g == null) return;
+        switch (key) {
+            case "mancare" -> g.check(R.id.chip_expense_food);
+            case "sanatate" -> g.check(R.id.chip_expense_health);
+            case "transport" -> g.check(R.id.chip_expense_transport);
+            case "casa" -> g.check(R.id.chip_expense_home);
+            default -> g.check(R.id.chip_expense_all);
+        }
+    }
+
+    private void applyFiltersVisibility(MaterialButton toggle) {
+        if (filtersContainer == null || toggle == null) return;
+        filtersContainer.setVisibility(filtersVisible ? View.VISIBLE : View.GONE);
+        toggle.setText(filtersVisible ? "Ascunde filtre" : "Arată filtre");
+    }
+
     private void setupPeriodDropdown() {
         if (dropdownPeriod == null) return;
         String[] options = {
@@ -233,13 +336,14 @@ public class ExpenseListActivity extends BaseActivity {
                 "Luna curentă", "Luna trecută", "Anul curent", "Perioadă custom"
         };
         dropdownPeriod.setSimpleItems(options);
-        dropdownPeriod.setText("Tot", false);
+        dropdownPeriod.setText(loadPref(KEY_PERIOD, "Tot"), false);
         dropdownPeriod.setOnItemClickListener((parent, view, position, id) -> {
             String sel = dropdownPeriod.getText().toString();
             if (sel.contains("custom")) {
                 showRangePicker();
             } else {
                 updateRangeFromDropdown();
+                savePrefs();
                 loadData();
             }
         });
@@ -254,6 +358,7 @@ public class ExpenseListActivity extends BaseActivity {
             rangeFrom = sel.first;
             rangeTo = sel.second;
             dropdownPeriod.setText("Perioadă custom", false);
+            savePrefs();
             loadData();
         });
         picker.show(getSupportFragmentManager(), "range_expense");

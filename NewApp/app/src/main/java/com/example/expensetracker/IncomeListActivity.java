@@ -23,11 +23,19 @@ public class IncomeListActivity extends BaseActivity {
     private List<Income> fullData;
     private List<Income> currentData;
     private SortMode sortMode = SortMode.DATE_DESC;
+    private TypeFilter typeFilter = TypeFilter.ALL;
+    private View filtersContainer;
+    private boolean filtersVisible = true;
     private long rangeFrom = 0L, rangeTo = Long.MAX_VALUE;
     private MaterialAutoCompleteTextView dropdownPeriod;
     private enum SortMode { DATE_DESC, CATEGORY, DATE_ASC }
-    private TypeFilter typeFilter = TypeFilter.ALL;
     private enum TypeFilter { ALL, PERSONAL, FIRMA }
+    private static final String PREFS = "income_filters";
+    private static final String KEY_TYPE = "type";
+    private static final String KEY_CATEGORY = "category";
+    private static final String KEY_SORT = "sort";
+    private static final String KEY_PERIOD = "period";
+    private static final String KEY_FILTERS_VISIBLE = "filters_visible";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,6 +51,16 @@ public class IncomeListActivity extends BaseActivity {
 
         dropdownPeriod = findViewById(R.id.dropdown_income_period);
         setupPeriodDropdown();
+
+        filtersContainer = findViewById(R.id.filters_container_income);
+        MaterialButton toggleFilters = findViewById(R.id.btn_toggle_filters_income);
+        if (toggleFilters != null && filtersContainer != null) {
+            toggleFilters.setOnClickListener(v -> {
+                filtersVisible = !filtersVisible;
+                applyFiltersVisibility(toggleFilters);
+                savePrefs();
+            });
+        }
 
         adapter.setListener(new IncomeAdapter.Listener() {
             @Override public void onRowClick(Income e) { openEdit(e); }
@@ -60,6 +78,7 @@ public class IncomeListActivity extends BaseActivity {
             sortBtn.setOnClickListener(v -> {
                 cycleSort();
                 sortBtn.setText(getSortLabel());
+                savePrefs();
                 publishCurrentData();
             });
             sortBtn.setText(getSortLabel());
@@ -73,6 +92,7 @@ public class IncomeListActivity extends BaseActivity {
 
     @Override protected void onResume() {
         super.onResume();
+        restorePrefs();
         loadData();
     }
 
@@ -135,9 +155,9 @@ public class IncomeListActivity extends BaseActivity {
         chipFamilie.setOnClickListener(l);
         chipPrimit.setOnClickListener(l);
         chipAlte.setOnClickListener(l);
-        chipTypeAll.setOnClickListener(v -> { typeFilter = TypeFilter.ALL; loadData(); });
-        chipTypePersonal.setOnClickListener(v -> { typeFilter = TypeFilter.PERSONAL; loadData(); });
-        chipTypeFirma.setOnClickListener(v -> { typeFilter = TypeFilter.FIRMA; loadData(); });
+        chipTypeAll.setOnClickListener(v -> { typeFilter = TypeFilter.ALL; savePrefs(); loadData(); });
+        chipTypePersonal.setOnClickListener(v -> { typeFilter = TypeFilter.PERSONAL; savePrefs(); loadData(); });
+        chipTypeFirma.setOnClickListener(v -> { typeFilter = TypeFilter.FIRMA; savePrefs(); loadData(); });
 
     }
 
@@ -165,6 +185,7 @@ public class IncomeListActivity extends BaseActivity {
             }
         }
         currentData = filtered;
+        savePrefs();
         publishCurrentData();
     }
 
@@ -234,6 +255,90 @@ public class IncomeListActivity extends BaseActivity {
         return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
+    private boolean loadPrefBoolean(String key, boolean def) {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        return sp.getBoolean(key, def);
+    }
+
+    private String loadPref(String key, String def) {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        return sp.getString(key, def);
+    }
+
+    private void savePrefs() {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        sp.edit()
+                .putString(KEY_PERIOD, dropdownPeriod != null ? dropdownPeriod.getText().toString() : "Tot")
+                .putString(KEY_TYPE, typeFilter.name())
+                .putString(KEY_SORT, sortMode.name())
+                .putString(KEY_CATEGORY, currentCategoryKey())
+                .putBoolean(KEY_FILTERS_VISIBLE, filtersVisible)
+                .apply();
+    }
+
+    private void restorePrefs() {
+        android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        String period = sp.getString(KEY_PERIOD, "Tot");
+        if (dropdownPeriod != null && period != null) dropdownPeriod.setText(period, false);
+
+        String type = sp.getString(KEY_TYPE, TypeFilter.ALL.name());
+        typeFilter = TypeFilter.valueOf(type);
+        selectTypeChip(typeFilter);
+
+        String sort = sp.getString(KEY_SORT, SortMode.DATE_DESC.name());
+        sortMode = SortMode.valueOf(sort);
+        MaterialButton sortBtn = findViewById(R.id.btn_sort_income);
+        if (sortBtn != null) sortBtn.setText(getSortLabel());
+
+        String categoryKey = sp.getString(KEY_CATEGORY, "all");
+        selectCategoryChip(categoryKey);
+        updateRangeFromDropdown();
+        filtersVisible = loadPrefBoolean(KEY_FILTERS_VISIBLE, true);
+        MaterialButton toggle = findViewById(R.id.btn_toggle_filters_income);
+        applyFiltersVisibility(toggle);
+    }
+
+    private String currentCategoryKey() {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_income);
+        if (g == null) return "all";
+        int id = g.getCheckedChipId();
+        if (id == R.id.chip_income_salariu) return "salariu";
+        if (id == R.id.chip_income_Bonus) return "bonus";
+        if (id == R.id.chip_income_familie) return "familie";
+        if (id == R.id.chip_income_primit) return "primit";
+        if (id == R.id.chip_income_altele) return "altele";
+        return "all";
+    }
+
+    private void selectTypeChip(TypeFilter tf) {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_income_type);
+        if (g == null) return;
+        switch (tf) {
+            case PERSONAL -> g.check(R.id.chip_income_type_personal);
+            case FIRMA -> g.check(R.id.chip_income_type_firma);
+            default -> g.check(R.id.chip_income_type_all);
+        }
+    }
+
+    private void selectCategoryChip(String key) {
+        com.google.android.material.chip.ChipGroup g = findViewById(R.id.chips_income);
+        if (g == null) return;
+        switch (key) {
+            case "salariu" -> g.check(R.id.chip_income_salariu);
+            case "bonus" -> g.check(R.id.chip_income_Bonus);
+            case "familie" -> g.check(R.id.chip_income_familie);
+            case "primit" -> g.check(R.id.chip_income_primit);
+            case "altele" -> g.check(R.id.chip_income_altele);
+            default -> g.check(R.id.chip_income_all);
+        }
+    }
+
+    private void applyFiltersVisibility(MaterialButton toggle) {
+        if (filtersContainer == null || toggle == null) return;
+        filtersContainer.setVisibility(filtersVisible ? View.VISIBLE : View.GONE);
+        toggle.setText(filtersVisible ? "Ascunde filtre" : "Arată filtre");
+    }
+
     private void setupPeriodDropdown() {
         if (dropdownPeriod == null) return;
         String[] options = {
@@ -241,13 +346,14 @@ public class IncomeListActivity extends BaseActivity {
                 "Luna curentă", "Luna trecută", "Anul curent", "Perioadă custom"
         };
         dropdownPeriod.setSimpleItems(options);
-        dropdownPeriod.setText("Tot", false);
+        dropdownPeriod.setText(loadPref(KEY_PERIOD, "Tot"), false);
         dropdownPeriod.setOnItemClickListener((parent, view, position, id) -> {
             String sel = dropdownPeriod.getText().toString();
             if (sel.contains("custom")) {
                 showRangePicker();
             } else {
                 updateRangeFromDropdown();
+                savePrefs();
                 loadData();
             }
         });
@@ -338,4 +444,5 @@ public class IncomeListActivity extends BaseActivity {
         }
         return new long[]{from.getTimeInMillis(), to.getTimeInMillis()};
     }
+
 }
